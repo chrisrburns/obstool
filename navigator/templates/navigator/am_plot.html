@@ -1,0 +1,54 @@
+{% extends "base_site.html" %}
+{% load myfilters %}
+{% block breadcrumbs %}<div class="breadcrumbs">
+   <a href="..">Home</a> &rsaquo;
+   Airmass Plot</div> {% endblock %}
+{% block pretitle %} <h2> Airmass Plot for Night of {{ date|date2ymd }} </h2> {% endblock %}
+{% block content %}
+<div id="content-main" style="padding: 0px; float:left;">
+   Red points = type AB, blue points = type C<br>
+{{ embed_image|safe }}
+</div>
+<div id="content-related" style="margin-left: -50px;">
+   {# filters #}
+   <div class="module" id="filters">
+      <h2>Filters</h2>
+      <form action="" method="post">{% csrf_token %}
+         {{ form.non_field_errors }}
+         Show:&nbsp; Type AB{{ form.type_ab.errors }} {{ form.type_ab }}
+               &nbsp;Type C{{ form.type_c.errors}} {{ form.type_c }}<br>
+         {{ form.prior_low.errors }} {{ form.prior_low }}
+         &le; Priority
+         {{ form.prior_high.errors }} {{ form.prior_high }}<br>
+         Nobs &le;
+         {{ form.Nobs_high }} {{ form.Nobs_high.errors }}
+         <br>
+         Airmass &le; {{ form.airmass_high.errors }} {{ form.airmass_high}}
+         <br>
+   </div>
+   <br>
+   <div class="module" id="settings">
+      <h2>Settings</h2>
+      Target Phase (AB): {{ form.target_phase.errors }} {{ form.target_phase }}<br>
+      Target Phase (C): {{ form.target_phase_c.errors }} {{ form.target_phase_c }}<br>
+      Length of Solid line:  {{ form.phase_win1.errors }} {{ form.phase_win1 }}<br>
+      {# Length of Dashed line:  {{ form.phase_win2.errors }} {{ form.phase_win2 }}<br> #}
+      Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
+      <div style="text-align: center;"><font size=-2>(mm/dd/yyyy hh:mm:ss)
+         </font>
+      </div><br>
+      {% comment %}
+      Nobs counts if:<br>
+      <div style="text-align: right;">
+      {{ form.Nobs_phase_low.errors }} {{ form.Nobs_phase_low }} &le;
+      Phase &le;
+      {{ form.Nobs_phase_high.errors }} {{ form.Nobs_phase_high }}</div>
+      {% endcomment %}
+      {{ form.new_window.errors }} {{ form.new_window }} Links open new window/tab
+   </div>
+   <br>
+   <input type="submit" name='action' value="Update">
+   <input type="submit" name='action' value="Reset">
+   </form>
+</div>
+{% endblock %}

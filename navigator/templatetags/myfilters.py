@@ -1,0 +1,66 @@
+from django import template
+from math import pi
+import string
+from obstool import settings
+try:
+   import ephem3 as ephem
+except:
+   import ephem
+
+register = template.Library()
+
+def date2hms(value):
+   # assume it is a date object
+   d = ephem.Date(value + settings.TZ_OFFSET*ephem.hour)
+   return(string.split(str(d))[1])
+register.filter('date2hms',date2hms)
+
+def date2ymd(value):
+   # assume it is a date object
+   d = ephem.Date(value + settings.TZ_OFFSET*ephem.hour)
+   return(string.split(str(d))[0])
+register.filter('date2ymd',date2ymd)
+
+def angle2hms(value):
+   d = ephem.hours(value*pi/180.)
+   return str(d)
+register.filter('angle2hms',angle2hms)
+
+def angle2hm(value):
+   d = ephem.hours(value*pi/180.)
+   return str(":".join(string.split(str(d),":")[0:2]))
+register.filter('angle2hm',angle2hm)
+
+def angle2dms(value):
+   d = ephem.degrees(value*pi/180.)
+   return(str(d))
+register.filter('angle2dms',angle2dms)
+
+
+def date2hm(value):
+   d = ephem.Date(value + settings.TZ_OFFSET*ephem.hour)
+   time = string.split(str(d))[1]
+   return(":".join(string.split(time,":")[0:2]))
+register.filter('date2hm',date2hm)
+
+def LST2hm(value):
+   d = ephem.hours(value)
+   return(":".join(string.split(str(d),":")[0:2]))
+register.filter('LST2hm',LST2hm)
+
+def LST2hms(value):
+   d = ephem.hours(value)
+   return str(d)
+register.filter('LST2hms',LST2hms)
+
+def format(value,format):
+   return format % value
+register.filter('format',format)
+
+def date2JD(value):
+   return value + 2415020
+register.filter('date2JD',date2JD)
+
+def date2MJD(value):
+   return value + 15019.5
+register.filter('date2MJD',date2MJD)

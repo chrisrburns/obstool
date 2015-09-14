@@ -1,0 +1,132 @@
+dark,ratin,name,RA,DEC,Const,size,Mv,type,distance,descr
+,,NGC7814,00:03:50,16:12:33,Peg,1'x5',12,G-Sa/Sb,40e6,Edge-on spiral/dust lane
+,,NGC40,00:13:35,72:35:43,Cep,36",10.2,PN,3700,Blue/bright central star
+,X,G1,00:33:33,39:39:37,And,-,-,GC,2.9e6,Brightest globular in M31
+,,M110,00:40:56,41:44:44,And,8'x3',8.0,G-E6,2.4e6,Companion to M31
+D,X,G156,00:42:59,41:00:57,And,-,-,GC,2.4e6,Globular in M31
+D,X,M31,00:43:16,41:19:44,And,160'x40',3.4,G-Sb,2.4e6,"Andromeda" galaxy
+D,X,M32,00:43:16,40:55:35,And,3.6'x3.1',8.2,G-E2,2.4e6,Companion to M31
+,,NGC246,00:47:32,-11:49:40,Cet,3.7',8.0,PN,1600,12M central star
+,,ETA CAS,00:49:43,57:52:34,Cas,11",3.5-7.5,Double,19,Yellow & red?
+,,NGC278,00:52:42,47:36:34,Cas,1.2'x1.2',11.6,G-Sc,26e6,Compact spiral
+,,NGC404,01:09:59,35:46:28,And,1.3'x1.3',11,G-E0/S0,8e6,Bright core
+,,ZET PSC,01:14:17,07:37:50,Psc,23.5",4.5-5.5,Double,148,Yellow and pale blue
+,,NGC488,01:22:20,05:18:15,Psc,3.5'x3',11.2,G-Sb,90e6,Compact spiral
+,XX,NGC604,01:35:08,30:51:20,Tri,2'x1.2',12,EN,3e6,Star forming region in M33
+,XX,M76,01:42:58,51:37:23,Per,2'x1',11.5,PN,2400,"Little Dumbbell" nebula
+,,1 ARI,01:50:43,22:19:42,Ari,2.8",5.8-6.6,Double,574,Colorful
+,,GAM ARI,01:54:06,19:20:49,Ari,7.8",4.2-4.4,Double,160,Both white
+,,GAM1 AND,02:04:33,42:22:58,And,9.6",2.5-5,Double,355,2.0M gold 2.1M blue
+,,IOT TRI,02:12:37,30:21:03,Tri,3.8",5-6.5,Double,200,Yellow and blue
+,,NGC891,02:23:13,42:23:51,And,13x2.8,9.9,G-Sb,43e6,Edge-on spiral/dust lane
+,,M77,02:43:13,-00:01:49,Cet,2.5'x1.7',8.8,G-Sbp,60e6,A Seyfert galaxy
+,,NGC1275,03:20:30,41:33:31,Per,2.6'-1.9',11.6,G-Pec,300e6,Perseus A radio source
+,,NGC1333,03:29:57,31:27:15,Per,3'x6',3.6,RN,1000,Relatively bright
+,,NGC1501,04:07:56,60:56:51,Cam,52",12.0,PN,3600,Dark center
+,,NGC1514,04:09:52,30:48:44,Tau,2',10.8,PN,2300,"Crystal Ball" nebula-9.4M central star
+,XXX,NGC1535,04:14:42,-12:42:50,Eri,18",10.4,PN,5800,"Cleopatra's Eye" Blue-grey nebula
+,X,R LEP,05:00:07,-14:47:26,Lep,-,6-11,Var.,1500,Hind's "Crimson Star"-carbon star
+,,IC418,05:28:00,-12:41:31,Lep,12",9.3,PN,2000,"Spirograph" Nebula 10M central star
+,,M1,05:35:09,22:01:26,Tau,5'x3',8.4,SNR,6300,"Crab" nebula
+,XXXXX,M42,05:35:56,-05:26:37,Ori,65',4,EN,1700,"Orion" nebula
+D,X,IC434/B33,05:41:35,-02:27:18,Ori,60'x10',-,E/DN,1500,"Horsehead" nebula
+,,M78,05:47:15,00:03:13,Ori,8'x6',8.0,E/RN,1600,Bright nucleus
+,,M37,05:53:06,32:33:10,Aur,20',5.6,OC,4400,Very rich galactic cluster
+,,NGC2163,06:08:26,18:39:55,Ori,1'x2',12,EN,144e6,Cederblad 62 (bipolar)
+,,PK 194+2.1,06:26:33,17:46:51,Gem,8",12.2,PN,200,Bright starlike
+,,BET MON,06:29:19,-07:22:25,Mon,7.3"/10.0",4.7-5.2-6.1,Triple,175,Triple
+,,NGC2261,06:39:47,08:43:26,Mon,2'x1',Var.,E/RN,2600,Hubble's Variable nebula
+,,NGC2301,06:52:21,00:27:15,Mon,12',6.0,OC,2500,Dense open cluster
+,,NGC2371,07:26:17,29:27:43,Gem,63",13.0,PN,4400,"Gemini" nebula-bright nucleus
+,XX,NGC2392,07:29:50,20:53:41,Gem,13",8.3,PN,3000,"Clown Face" nebula
+,,NGC2419,07:38:50,38:51:32,Lyn,4.1',10.4,GC,182000,Remotest galactic globular?
+,,NGC2438,07:42:18,-14:45:27,Pup,65",11,PN,4600,In open cluster M46
+,,ZET CNC,08:12:50,17:36:57,Cnc,0.8"/5.8",5.5-6-5.5,Triple,70,Triple
+,,IOT CNC,08:47:21,28:43:14,Cnc,30.5",4.4-6.5,Double,298,Blue and gold
+,,NGC2683,08:53:22,33:22:33,Lyn,9.3'x2.5',9.7,G-Sb,16e6,Bright nearly edge-on
+,,NGC2841,09:22:46,50:55:11,UMa,8.1'x3.8',9.3,G-Sb,31e6,Elongated spiral
+D,X,M81,09:56:29,69:00:49,UMa,18'x10',6.8,G-Sb,8e6,Bright spiral
+D,X,M82,09:56:48,69:37:46,UMa,8'x3',8.4,G-Irr,8e6,"Exploding" galaxy
+,,QSO 0957+561,10:02:05,55:50:43,UMa,6",17,QSO,8.7e9,Double Quasar (gravit. lensed)
+,,GAM LEO,10:20:33,19:47:14,Leo,4.4",2.5-3.5,Double,118,Algieba
+,XX,NGC3242,10:25:19,-18:41:05,Hya,16",8.6,PN,2800,"Ghost of Jupiter" nebula
+,,M97,11:15:25,54:57:21,UMa,2.5',11.2,PN,2000,"Owl" nebula
+,,M65,11:19:29,13:02:06,Leo,7.8'x1.6',9.3,G-Sb,30e6,Elongated spiral
+,,M66,11:20:47,12:56:13,Leo,8'x2.5',9,G-Sb,35e6,Large dust lanes
+,,M109,11:58:09,53:18:47,Uma,6.4'x3.5',9.8,G-Sb,50e6,Barred spiral
+,,NGC4038,12:02:26,-18:55:22,Crv,3'x2',10.7,G-Sc,90e6,"Antennae" galaxy
+,,NGC4039,12:02:26,-18:56:22,Crv,3'x2',10.7,G-Sc,90e6,"Antennae" galaxy
+,,M99,12:19:20,14:21:27,Com,4.5'x4',9.8,G-Sc,70e6,Face-on spiral
+,,M106,12:19:29,47:14:33,CVn,19.5'x6.5',8.3,G-Sbp,35e6,Bright spiral
+,,M61,12:22:27,04:24:50,Vir,5.7'x5.5',9.7,G-Sc,65e6,Face-on spiral
+,,M86,12:26:43,12:53:17,Vir,3'x2',9.2,G-E3,50e6,450km/sec in approach
+,X,3C273,12:29:38,01:59:40,Vir,-,12,QSO,3e9,Quasar
+,,M49,12:30:18,07:56:28,Vir,4'x3.4',8.4,G-E4,65e6,Bright elliptical galaxy
+,,M87,12:31:21,12:19:52,Vir,3'x3',8.6,G-E1,65e6,Jet and black hole
+,XX,24 COM,12:35:39,18:19:04,Com,20",5.3-6.7,Double,614,Spring Albireo/orange and blue
+,,M89,12:36:11,12:29:54,Vir,2'x2',9.8,G-E0,65e6,Fainter than M86
+,,NGC4565,12:36:49,25:55:25,Com,16'x2.8',9.6,G-Sb,31e6,Edge-on spiral/dust lane
+,,NGC4567,12:37:01,11:11:30,Vir,4.6'x2.1',11,G-Sc,65e6,"Siamese Twin" galaxy
+,,NGC4568,12:37:07,11:10:30,Vir,4.6'x2.1',11,G-Sc,65e6,"Siamese Twin" galaxy
+,,NGC4605,12:40:28,61:33:17,UMa,5.5'x2.3',9.6,G-Sc,14e9,Peculiar galaxy
+D,XX,M104,12:40:32,-11:40:44,Vir,7'x1.5',8.3,G-Sb,70e6,"Sombrero" galaxy
+,,NGC4631,12:42:36,32:28:24,CVn,15'x3.3',9.3,G-Sc,25e6,Edge- on spiral
+,XX,Y CVN,12:45:37,45:22:46,CVn,-,5-6.4,Var.,400,"La Superba" - carbon star
+,,M94,12:51:22,41:03:33,CVn,5'x3.5',8.1,G-Sbp,21e6,Bright comet-like
+,XX,ALP2 CVN,12:56:31,38:15:31,CVn,20",3-5.5,Double,110,"Cor Caroli"
+,,M64,12:57:15,21:37:34,Com,7.5'x3.5',8.5,G-Sb,24e6,"Black Eye" galaxy
+,,M53,13:13:24,18:06:35,Com,10',7.7,GC,65000,Radiating chains
+,,M63,13:16:17,41:57:34,CVn,9'x4',8.6,G-Sb,35e6,"Sunflower" galaxy
+D,XXXX,M51,13:30:20,47:08:20,CVn,10'x5.5',8.1,G-Sc,35e6,"Whirlpool" galaxy
+,XXX,M3,13:42:40,28:19:41,CVn,18'x10',6.4,GC,42000,130LY diameter
+D,XX,M101,14:03:33,54:17:47,UMa,21',7.7,G-Sc,25e6,"Pinwheel" galaxy
+,,EPS BOO,14:45:25,27:01:41,Boo,3.0",2.5-5,Double,210,Yellow-orange & bluegreen
+,,XI BOO,14:51:51,19:03:21,Boo,6.0",4.7-6.6,Double,22,Yellow & reddish violet
+,,NGC5907,15:16:09,56:16:27,Dra,12.3'x2',10.4,G-Sb,40e6,Edge-on/dust lane
+,XXX,M5,15:19:06,02:02:42,Ser,13',5.8,GC,29000,
+,XXXX,M13,16:42:03,36:26:19,Her,23',5.9,GC,26000,
+,,NGC6210,16:44:55,23:47:45,Her,14",9.3,PN,4700,Starlike
+,,M12,16:47:43,-01:58:08,Oph,14.5',6.6,GC,23000,
+,,M10,16:57:38,-04:07:00,Oph,8',6.6,GC,23000,
+,,MU DRA,17:05:31,54:27:13,Dra,2.5",5-5.1,Double,88,
+,XX,NGC6309,17:14:40,-12:55:44,Oph,25"x15",11.5,PN,8e6,"Box" Nebula
+,,ALP HER,17:15:06,14:22:39,Her,4.7",3-5.5,Double,1369,Ras Algethi (red & green)
+,,M92,17:17:23,43:08:13,Her,8',6.5,GC,33000,
+,XXX,T DRA,17:56:30,58:12:56,Dra,15.6",var.-10,Double,2300,Pale blue and red
+,,BARNARD'S,17:58:18,04:41:30,Oph,-,9.53,Misc,6,Barnard's Star
+,XXXX,NGC6543,17:58:32,66:37:52,Dra,18",8.8,PN,4400,"Cat's Eye" nebula
+,,M20,18:02:54,-23:02:01,Sgr,25',8.5,E/RN,5200,"Trifid" nebula
+,,M8,18:04:25,-24:23:02,Sgr,80'x40',5.8,EN,5200,"Lagoon" nebula
+,,70 OPH,18:05:57,02:29:59,Oph,3.6",4-6,Double,16.5,Yellow & orange
+,XX,NGC6572,18:12:35,06:51:06,Oph,14",9.0,PN,3500,"Blue Racquetball" small bright blue
+,,M16,18:19:22,-13:46:47,Ser,25',6.0,EN-OC,8100,"Eagle" nebula
+,,M17,18:21:22,-16:10:45,Sgr,45'x35',7,EN,6900,"Swan" nebula
+,,STRUVE 2306,18:22:46,-15:04:44,Sct,11.2",7.2-7.9,Double,,Yellow and blue
+,,T LYR,18:32:40,37:00:18,Lyr,-,7.8-9.6,Var,2000,Reddish orange
+,,M22,18:37:00,-23:53:31,Sgr,18',5.1,GC,9600,
+,XXX,EPS1 LYR,18:44:39,39:40:49,Lyr,2.6",5.5-6.5,Double,180,"Double-double"
+,XXX,EPS2 LYR,18:44:42,39:37:22,Lyr,2.3",5-5.5,Double,180,"Double-double"
+,XXX,M11,18:51:38,-06:15:18,Sct,12',5.8,OC,5600,"Wild Duck" cluster
+,XXXX,M57,18:53:57,33:02:45,Lyr,1.3'x1',9.0,PN,2600,"Ring" nebula
+,,THE1 SER,18:56:42,04:12:59,Ser,22.0",4.5-5.5,Double,132,Alya
+,,NGC6781,19:18:53,06:34:06,Aql,109",11.8,PN,2500,Fairly bright
+,XXX,BET1 CYG,19:31:06,27:58:53,Cyg,34.5",3-5.5,Double,385,Albireo
+,XXX,PK 64+5.1,19:35:13,30:32:14,Cyg,8",9.6,PN,31000,Campbell's "Hydrogen Star"
+,X,NGC6818,19:44:34,-14:07:34,Sgr,17",9.9,PN,7300,"Little Gem"
+,XXX,NGC6826,19:45:03,50:32:32,Cyg,30",9.8,PN,3600,"Blinking" planetary nebula
+,,DEL CYG,19:45:16,45:09:22,Cyg,2.6",3-6.5,Double,170,
+,XXX,M27,20:00:01,22:44:42,Vul,8'x5',8.1,PN,1100,"Dumbbell" nebula
+D,X,PK 80-6.1,21:02:42,36:44:07,Cyg,16",13.5,PN?,3000,"Egg" nebula
+,XXXX,NGC7009,21:04:45,-11:19:37,Aqr,25",8.3,PN,3200,"Saturn" nebula
+,,61 C3CYG,21:07:17,38:47:20,Cyg,30",5-5.6,Double,11.4,Dwarf pair
+,XX,NGC7027,21:07:28,42:16:36,Cyg,15",8.5,PN,2600,Bluegreen protoplanetary nebula
+,XXXX,M15,21:30:29,12:12:44,Peg,10',6.4,GC,42000,
+,XXX,M2,21:34:01,-00:46:17,Aqr,7',6.5,GC,49000,
+,,S CEP,21:34:58,78:40:29,Cep,-,7.4-12.9,Var.,2000,Carbon star
+,XX,MU CEP,21:43:47,58:49:51,Cep,-,3.7-5,Var.,5260,"Garnet Star"
+,,KRG60,22:28:22,57:45:23,Cep,3.0",10-11,Double,13.1,Red dwarfs
+,,NGC7293,22:30:09,-20:44:57,Aqr,13',6.5,PN,530,"Helix" Nebula
+,,NGC7331,22:37:33,34:28:21,Peg,11'x4',9.5,G-Sb,50e6,Bright spiral
+,,NGC7479,23:05:24,12:22:23,Peg,3.2'x2.5',11.8,G-Sb,105e6,S-shaped spiral
+,XXXX,NGC7662,23:26:23,42:36:36,And,20",9.2,PN,4600,"Blue Snowball" nebula
+,,TX PSC,23:46:55,03:32:42,Psc,-,4.8-5.2,Var.,760,Carbon star

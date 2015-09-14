@@ -1,0 +1,79 @@
+{% extends "base_site.html" %}
+{% load myfilters %}
+{% block style %}
+<script src="/media/js/sorttable.js"></script>
+{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="..">Home</a> &rsaquo;Object Listing</div> {% endblock %}
+{% block pretitle %} <h2>Object Listing for {{date}} (UT{{ tz_offset }})</h2> {% endblock %}
+{% block content %}
+<div id="content-main">
+   {% if object_list %}
+      Showing {{ object_list|length }} objects<br>
+      <font size=-3 color="grey">Click on table headers to sort</font>
+      <table class='sortable' cellspacing="0" border=1 id="result_list">
+         <thead>
+            <tr>
+               <th>Dark?</th>
+               <th>Rating</th>
+               <th>Name</th>
+               <th>RA</th>
+               <th>DEC</th>
+               <th>HA</th>
+               <th>size/sep</th>
+               <th>Type</th>
+               <th>Description</th>
+            </tr>
+         </thead>
+         <tbody>
+            {% for obj in object_list %}
+            <tr class="{% cycle 'row1' 'row2' %}">
+               <td>{% if obj.dark %}D{% endif %}</td>
+               <td>{{ obj.srating|safe }}</td>
+               <th><a href="{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
+               <td>{{ obj.rah }}</td>
+               <td>{{ obj.decd }}</td>
+               <td>{{ obj.hour_angle|format:"%.1f" }}</td>
+               <td>{{ obj.size }}</td>
+               <td>{{ obj.objtype }}</td>
+               <td>{{ obj.descr }} </td>
+            </tr>
+            {% endfor %}
+         </tbody>
+      </table>
+   {% else %}
+      <p> No objects in database</p>
+   {% endif %}
+</div>
+<div id="content-related" style="margin-right: -25em;">
+   {# filters #}
+   <form action="" method="post">{% csrf_token %}
+   <div class="module" id="settings">
+      <h2>Settings</h2>
+      Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
+      <div style="text-align: center;">
+         <font size=-2>(mm/dd/yyyy hh:mm:ss)<br>Blank = now </font>
+      </div><br>
+      UTC offset: {{ form.tz_offset.errors }} {{ form.tz_offset }}<br>
+      <div style="text-align: center;">
+         <font size=-2>(negative == West)</font>
+      </div><br>
+      {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
+
+   </div>
+   <div class="module" id="filters">
+      <h2>Filters</h2>
+         Rating &ge;
+         {{ form.non_field_errors }}
+         {{ form.rating_low.errors }} {{ form.rating_low}}
+         <br>
+         Airmass &le; {{ form.airmass_low.errors }} {{ form.airmass_high}}
+         <br>
+         {{ form.only_visible.errors }}
+         <label for="id_only_visible">Only visible:</label> {{ form.only_visible }}
+   </div>
+   <br>
+   <input type="submit" name='action' value="Update">
+   <input type="submit" name='action' value="Reset">
+   </form>
+</div>
+{% endblock %}

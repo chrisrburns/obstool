@@ -1,0 +1,53 @@
+{% extends "base_site.html" %}
+{% load myfilters %}
+{% block style %}
+<script src="/media/js/sorttable.js"></script>
+{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="..">Home</a> &rsaquo;Search Results</div> {% endblock %}
+{% block pretitle %} <h2>Search Results</h2> {% endblock %}
+{% block content %}
+<div id="content-main">
+   {% if message %}
+      <div style="background: #eeffcc;"> 
+         <img src="/media/img/admin/icon_success.gif"> 
+         &nbsp;&nbsp;{{ message }} 
+      </div>
+   {% endif %}
+   {% if error %}
+      <div style="background: red; color: white;">
+         <img src="/media/img/admin/icon_alert.gif"> 
+         &nbsp;&nbsp; {{ error }} 
+      </div>
+   {% endif %}
+   {% if objects %}
+      Showing {{ objects|length }} objects<br>
+      <font size=-3 color="grey">Click on table headers to sort</font>
+      <table class='sortable' cellspacing="0" border=1 id="result_list">
+         <thead>
+            <tr>
+               <th>Name</th>
+               <th>Type</th>
+               <th>RA</th>
+               <th>DEC</th>
+               <th>Vmag</th>
+               <th>Pr.</th>
+               <th>Nobs</th>
+            </tr>
+         </thead>
+         <tbody>
+            {% for obj in objects %}
+            <tr class="{% cycle 'row1' 'row2' %}">
+               <th><a href="../object/{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
+               <td>{{ obj.type }}</td>
+               <td>{{ obj.ra|angle2hms }}</td>
+               <td>{{ obj.dec|angle2dms }}</td>
+               <td>{{ obj.Vmag }} </td>
+               <td>{{ obj.priority }} </td>
+               <td>{{ obj.Nobs }} </td>
+            </tr>
+            {% endfor %}
+         </tbody>
+      </table>
+   {% endif %}
+</div>
+{% endblock %}

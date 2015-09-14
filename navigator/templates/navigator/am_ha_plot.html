@@ -1,0 +1,72 @@
+{% extends "base_site.html" %}
+{% load myfilters %}
+{% block breadcrumbs %}<div class="breadcrumbs">
+   <a href="..">Home</a> &rsaquo;
+   Airmass/HA Plot</div> {% endblock %}
+{% block pretitle %} <h2> Airmass Plot for Night of {{ date|date2ymd }} </h2> {% endblock %}
+{% block content %}
+<div id="content-main">
+   Red points = type AB, blue points = type C<br>
+   Circles = North, Squares = South<br>
+{{ embed_image|safe }}
+</div>
+<div id="content-related" style="margin-left: -20px;">
+   {# filters #}
+   <div class="module" id="filters">
+      <h2>Filters</h2>
+      <form action="" method="post">{% csrf_token %}
+         {{ form.non_field_errors }}
+         Show:&nbsp; Type AB{{ form.type_ab.errors }} {{ form.type_ab }}
+               &nbsp;Type C{{ form.type_c.errors}} {{ form.type_c }}<br>
+         {{ form.phase_low.errors }} {{ form.phase_low}}
+         &le; Phase(AB) &le;
+         {{ form.phase_high.errors }} {{ form.phase_high }}
+         <br>
+         {{ form.phase_c_low.errors }} {{ form.phase_c_low}}
+         &le; Phase(C) &le;
+         {{ form.phase_c_high.errors }} {{ form.phase_c_high }}
+         <br>
+         {{ form.Nobs_low.errors }} {{ form.Nobs_low}}
+         &le; Nobs &le;
+         {{ form.Nobs_high.errors }} {{ form.Nobs_high }}
+         <br>
+         {{ form.prior_low.errors }} {{ form.prior_low}}
+         &le; Priority &le;
+         {{ form.prior_high.errors }} {{ form.prior_high }}
+         <br>
+         Airmass &le; {{ form.airmass_low.errors }} {{ form.airmass_high}}
+         <br>
+         {{ form.only_risen.errors }}
+         <label for="id_only_risen">Only risen:</label> {{ form.only_risen }}
+         {% if form.N_future.data %}
+            <input type=hidden name="N_future" value={{ form.N_future.data }}>
+         {% else %}
+            <input type=hidden name="N_future" value={{ form.N_future.field.initial }}>
+         {% endif %}
+         {% if form.future_airmass_high.data %}
+            <input type=hidden name="future_airmass_high" value={{ form.future_airmass_high.data }}>
+         {% else %}
+            <input type=hidden name="future_airmass_high" value={{ form.future_airmass_high.field.initial }}>
+         {% endif %}
+   </div>
+   <br>
+   <div class="module" id="settings">
+      <h2>Settings</h2>
+      Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
+      <div style="text-align: center;">
+         <font size=-2>(mm/dd/yyyy hh:mm:ss)<br>Blank = now </font>
+      </div><br>
+      {% comment %} Nobs counts if:<br>
+      <div style="text-align: right;">
+      {{ form.Nobs_phase_low.errors }} {{ form.Nobs_phase_low }} &le;
+      Phase &le;
+      {{ form.Nobs_phase_high.errors }} {{ form.Nobs_phase_high }} </div><br>
+      {% endcomment %}
+      {{ form.new_window }} Links open new window/tab
+   </div>
+   <br>
+   <input type="submit" name='action' value="Update">
+   <input type="submit" name='action' value="Reset">
+   </form>
+</div>
+{% endblock %}
