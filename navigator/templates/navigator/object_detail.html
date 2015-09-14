@@ -9,8 +9,8 @@
    {{ object.name }} </div> {% endblock %}
 {% block pretitle %} <h2> {{ object.name }} </h2> {% endblock %}
 {% block content %}
-<h1> RA:  {{ object.rah }}<br>
-     DEC: {{ object.decd }}<br>
+<h1> RA:  {{ object.PrecRAh }}<br>
+     DEC: {{ object.PrecDECd }}<br>
      AZ:  {{ object.azimuth|format:"%.2f" }}<br>
      ALT:  {{ object.altitude|format:"%.2f" }}<br></h1>
 <P>
@@ -20,7 +20,7 @@
       <table cellspacing="0" border=0>
          <tr><td>Description:</td><td> {{ object.descr }}</td></tr>
          <tr><td>Type:</td><td> {{ object.objtype }}</td></tr>
-         <tr><td>RA/DEC: </td><td> {{ object.RA|angle2hms }} {{ object.DEC|angle2dms }} </td></tr>
+         <tr><td>RA/DEC (J2000): </td><td> {{ object.RA|angle2hms }} {{ object.DEC|angle2dms }} </td></tr>
          <tr><td>Size: </td><td> {{ object.size }} </td></tr>
          <tr><td>Vmag: </td><td> {{ object.Mv }} </td></tr>
          <tr><td>Distance: </td><td> {{ object.sdistance }} </td></tr>

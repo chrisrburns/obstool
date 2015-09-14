@@ -50,10 +50,14 @@ class Object(models.Model):
 
    def genobj(self):
       '''Generate a pyephem object'''
-      star = ephem.FixedBody()
-      star._ra = self.RA*pi/180.0
-      star._dec = self.DEC*pi/180.0
-      star._epoch = ephem.J2000
+      if self.objtype == "SS":
+         # solar system object, no ra or dec
+         star = getattr(ephem, self.name)
+      else:
+         star = ephem.FixedBody()
+         star._ra = self.RA*pi/180.0
+         star._dec = self.DEC*pi/180.0
+         star._epoch = ephem.J2000
       return star
 
    def PrecRAh(self, date=None):
