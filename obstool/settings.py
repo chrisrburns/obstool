@@ -15,7 +15,8 @@ import os
 
 # Here are some site-wide configuration settings that can be changed 
 # on a per-user basis:
-FINDER_SIZE=60      # arc-min
+FINDER_BASE_SIZE=60      # arc-min
+FINDER_SIZE=10      # arc-min
 FINDER_FLIP=None # default finder is North up, East left.  Specify
                    # "leftright", "topbottom", or "both" to change this
 FINDER_ORIENTATION="North up, East left"     # let's be clear about this

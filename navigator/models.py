@@ -52,7 +52,7 @@ class Object(models.Model):
       '''Generate a pyephem object'''
       if self.objtype == "SS":
          # solar system object, no ra or dec
-         star = getattr(ephem, self.name)
+         star = getattr(ephem, self.name)()
       else:
          star = ephem.FixedBody()
          star._ra = self.RA*pi/180.0
@@ -65,14 +65,15 @@ class Object(models.Model):
       MWO = genMWO(date)
       star = self.genobj()
       star.compute(MWO)
-      return str(star.ra)
+      return (star.ra)
 
-   def PrecDECd(self, date=None):
+   def PrecDecd(self, date=None):
       '''Return the precessed Declination to date'''
       MWO = genMWO(date)
       star = self.genobj()
       star.compute(MWO)
-      return str(star.dec)
+      print star.dec
+      return (star.dec)
 
    def hour_angle(self, date=None):
       MWO = genMWO(date)
@@ -80,15 +81,20 @@ class Object(models.Model):
       star.compute(MWO)
       return (MWO.sidereal_time() - star.ra)*180./pi/15.0
 
-   def airmass(self, date):
+   def airmass(self, date=None):
       alt = self.altitude(date)
       if alt < 0:
          return "-1.0"
       airmass = 1.0/cos(pi/2 - alt)
       return "%.3f" % airmass
 
-   def sdistance(self):
+   def sdistance(self, date=None):
       dist = self.distance
+      if self.objtype == 'SS':
+         MWO = genMWO(date)
+         star = self.genobj()
+         star.compute(MWO)
+         return "%.4f AU" % (star.earth_distance)
       if dist < 1000.:
          return "%.1f" % (dist)
       if dist < 1e6:
@@ -116,6 +122,20 @@ class Object(models.Model):
       star = self.genobj()
       star.compute(MWO)
       return star.az*180.0/pi
+
+   def ssize(self, date=None):
+      if self.objtype == 'SS':
+         MWO = genMWO(date)
+         star = self.genobj()
+         star.compute(MWO)
+         return '%.2f"' % (star.radius*180./pi*3600)
+
+   def sMv(self, date=None):
+      if self.objtype == 'SS':
+         MWO = genMWO(date)
+         star = self.genobj()
+         star.compute(MWO)
+         return '%.2f' % (star.mag)
 
    def srating(self):
       return "&#9734;"*self.rating

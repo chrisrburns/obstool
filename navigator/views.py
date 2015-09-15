@@ -18,6 +18,7 @@ try:
    import ephem3 as ephem
 except:
    import ephem
+import get_planets
 
 rotations = {'90':Image.ROTATE_90,
              '180':Image.ROTATE_180,
@@ -74,7 +75,7 @@ def index(request):
    else:
       date = ephem.now()
 
-   obj_list = Object.objects.all().order_by('RA')
+   obj_list = sorted(Object.objects.all(), key=lambda a: float(a.PrecRAh()))
    for obj in obj_list:  
       if type(obj_list) is not type([]):
          obj_list = list(obj_list)
@@ -133,7 +134,7 @@ def detail(request, object_id):
    else:
       date = ephem.now()
 
-   if settings.FINDER_SIZE != 60:
+   if settings.FINDER_SIZE != settings.FINDER_BASE_SIZE:
       extras += "size=%d&" % (settings.FINDER_SIZE)
    if settings.FINDER_REVERSE:
       extras += "reverse=1&"
@@ -188,13 +189,31 @@ def finder(request, objectid):
    low = int(request.GET.get('low',0))
    high = int(request.GET.get('high',255))
    reverse = request.GET.get('reverse',None)
+   if obj.objtype == 'SS':
+      if 'object_list_form' in request.session:
+         epoch = str(request.session['object_list_form']['epoch'])
+         tz_offset = float(request.session['object_list_form']['tz_offset'])
+         if tz_offset is None:
+            tz_offset = 0
+         if not epoch:
+            date = ephem.now()
+         else:
+            date = ephem.Date(epoch) - tz_offset*ephem.hour
+      else:
+         date = ephem.now()
+      content = get_planets.get_image(obj.name, date, size)
+      if content:
+         response = HttpResponse(content, content_type="image/png")
+         response['Content-Disposition'] = 'inline; filename=%s' % \
+               (obj.name+".png")
+         return response
    obj.finder.open()
    # If needed do some transformations
    outstr = StringIO.StringIO()
    img = Image.open(obj.finder)
-   if size and int(size) < 10.0:
+   if size and int(size) < settings.FINDER_BASE_SIZE:
       size = int(size)
-      scale = 10.0/img.size[0]    # arc-min per pixel
+      scale = 1.0*settings.FINDER_BASE_SIZE/img.size[0]    # arc-min per pixel
       new_size = int(size/scale)  # New size in pixels
       img = img.crop((int(img.size[0]-new_size)/2,
                      int(img.size[1]-new_size)/2,

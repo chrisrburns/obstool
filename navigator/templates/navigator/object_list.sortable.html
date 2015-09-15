@@ -30,10 +30,10 @@
                <td>{% if obj.dark %}D{% endif %}</td>
                <td>{{ obj.srating|safe }}</td>
                <th><a href="{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
-               <td>{{ obj.rah }}</td>
-               <td>{{ obj.decd }}</td>
+               <td>{{ obj.PrecRAh }}</td>
+               <td>{{ obj.PrecDecd }}</td>
                <td>{{ obj.hour_angle|format:"%.1f" }}</td>
-               <td>{{ obj.size }}</td>
+               <td>{{ obj.ssize }}</td>
                <td>{{ obj.objtype }}</td>
                <td>{{ obj.descr }} </td>
             </tr>

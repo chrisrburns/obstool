@@ -63,19 +63,24 @@ for i in range(len(t)):
    except ObjectDoesNotExist:
       print "Adding object"
       o = Object(name=name, **args)
-      print "Fetching",url % (args['RA'],args['DEC'])
-      u = urllib.urlopen(url % (args['RA'],args['DEC']))
-      f = cStringIO.StringIO(u.read())
-      u.close()
-      im = Image.open(f)
-      #f.close()
-      x,y = im.size
-      im2 = im.resize((x/2,y/2))
-      f2 = cStringIO.StringIO()
-      im2.save(f2, format='PNG')
-      o.finder.save('finder_'+o.savename()+'.gif', ContentFile(f2.getvalue()))
-      f.close()
-      f2.close()
+      if args['objtype'] == 'SS':
+         f = open('SS_default.png')
+         o.finder.save('finder_'+o.savename()+'.png', ContentFile(f.read()))
+         f.close()
+      else:
+         print "Fetching",url % (args['RA'],args['DEC'])
+         u = urllib.urlopen(url % (args['RA'],args['DEC']))
+         f = cStringIO.StringIO(u.read())
+         u.close()
+         im = Image.open(f)
+         #f.close()
+         x,y = im.size
+         im2 = im.resize((x/2,y/2))
+         f2 = cStringIO.StringIO()
+         im2.save(f2, format='PNG')
+         o.finder.save('finder_'+o.savename()+'.gif', ContentFile(f2.getvalue()))
+         f.close()
+         f2.close()
    o.save()
    print o.name + " loaded"
 
