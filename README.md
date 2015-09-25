@@ -16,6 +16,6 @@ Requirements:
   * [Python Imaging Library (PIL) >= 1.1.7](http://www.pythonware.com/products/pil/)
   * [django 1.8.4](https://www.djangoproject.com/)
 
-Screenshop:
+Screenshot:
 
-   ![Screenshot](./screenshot.png)
+   ![Screenshot](https://github.com/chrisrburns/obstool/blob/master/screeshot.png?raw=true)
