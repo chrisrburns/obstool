@@ -18,4 +18,4 @@ Requirements:
 
 Screenshop:
 
-   ![Screenshot](./screenshot.png)
+   ![Screenshot](https://github.com/chrisrburns/obstool/blob/master/screeshot.png?raw=true)
