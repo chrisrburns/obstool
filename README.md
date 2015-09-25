@@ -15,3 +15,7 @@ Requirements:
   * [pyephem >= 3.7.6.0](http://rhodesmill.org/pyephem/)
   * [Python Imaging Library (PIL) >= 1.1.7](http://www.pythonware.com/products/pil/)
   * [django 1.8.4](https://www.djangoproject.com/)
+
+Screenshop:
+
+   ![Screenshot](./screenshot.png)
