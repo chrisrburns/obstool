@@ -2,7 +2,7 @@ from django.shortcuts import render
 import sys,os,subprocess
 from django.template import Context, loader, RequestContext
 from django.shortcuts import render_to_response
-from navigator.models import Object
+from navigator.models import Object,genMWO
 from django.http import HttpResponse, HttpResponseRedirect
 from django import forms
 from django.core.context_processors import csrf
@@ -18,6 +18,7 @@ try:
    import ephem3 as ephem
 except:
    import ephem
+from math import pi
 import get_planets
 
 rotations = {'90':Image.ROTATE_90,
@@ -35,9 +36,39 @@ class FilterForm(forms.Form):
    only_visible = forms.BooleanField(required=False, label='Only Visible')
    # Settings
    epoch = forms.DateTimeField(required=False)
-   tz_offset = forms.FloatField(required=False, initial=0)
+   tz_offset = forms.FloatField(required=False, initial=0,
+         widget=forms.TextInput(attrs={'size':'5'}))
+                
    new_window = forms.BooleanField(required=False, initial=False)
 
+def get_current_time(request):
+   '''Get the current time. This could be 'now' or stored in the session'''
+   epoch = None
+   tz_offset = 0
+   if 'object_list_form' in request.session:
+      epoch = str(request.session['object_list_form']['epoch'])
+      tz_offset = float(request.session['object_list_form']['tz_offset'])
+      if tz_offset is None:
+         tz_offset = 0
+      if not epoch:
+         date = ephem.now()
+      else:
+         date = ephem.Date(epoch) - tz_offset*ephem.hour
+   else:
+      date = ephem.now()
+
+   return date
+
+def telescope_position(obj_name,date):
+   '''Given an RA/DEC, return hour-angle, altitude, and azimuth as strings.
+   RA and DEC are assumed to be at the epoch 'date' (ie., have been precessed)'''
+   obj = Object.objects.get(name=obj_name)
+   obj.epoch = date
+   return (obj.PrecRAh(),
+           obj.PrecDecd(),
+           ephem.hours(obj.hour_angle()*15.0*pi/180.),
+           "%.2f" % (obj.altitude()),
+           "%.2f" % (obj.azimuth()))
 
 def index(request):
    only_visible = None
@@ -46,27 +77,34 @@ def index(request):
    rating_low = None
    new_window = False
    tz_offset = 0
-   if request.method == "POST" or 'object_list_form' in request.session:
-      if request.method == "POST":
-         if request.POST['action'] == 'Update':
-            form = FilterForm(request.POST)
-            # save this form info into the session cache
-            request.session['object_list_form'] = request.POST.copy()
-         else:
-            form = FilterForm()
-            if 'object_list_form' in request.session:
-               del request.session['object_list_form']
+   #Default:  nothing posted and no session info
+   cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
+   prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
+   form = FilterForm()
+
+   if request.method == "POST":
+      if request.POST['action'] == 'Update':
+         form = FilterForm(request.POST)
+         # save this form info into the session cache
+         request.session['object_list_form'] = request.POST.copy()
+      elif request.POST['action'] == 'Park':
+         request.session['cur_tel_obj'] = 'Park'
+         cur_tel_obj = 'Park'
       else:
-         form = FilterForm(request.session['object_list_form'])
-      if form.is_valid():
-         only_visible = form.cleaned_data.get('only_visible',None)
-         airmass_high = form.cleaned_data.get('airmass_high',2.0)
-         rating_low = form.cleaned_data.get('rating_low',None)
-         epoch = form.cleaned_data.get('epoch',None)
-         tz_offset =form.cleaned_data.get('tz_offset', 0)
-         new_window = form.cleaned_data.get('new_window',False)
-   else:
-      form = FilterForm()
+         # The reset button was called
+         form = FilterForm()
+         if 'object_list_form' in request.session:
+            del request.session['object_list_form']
+   if 'object_list_form' in request.session:
+      form = FilterForm(request.session['object_list_form'])
+
+   if form.is_valid():
+      only_visible = form.cleaned_data.get('only_visible',None)
+      airmass_high = form.cleaned_data.get('airmass_high',2.0)
+      rating_low = form.cleaned_data.get('rating_low',None)
+      epoch = form.cleaned_data.get('epoch',None)
+      tz_offset =form.cleaned_data.get('tz_offset', 0)
+      new_window = form.cleaned_data.get('new_window',False)
 
    if tz_offset is None:
       tz_offset = 0
@@ -75,21 +113,23 @@ def index(request):
    else:
       date = ephem.now()
 
-   obj_list = sorted(Object.objects.all(), key=lambda a: float(a.PrecRAh()))
+   obj_list = Object.objects.all()
+   for obj in obj_list:
+      obj.epoch = date
+   obj_list = sorted(obj_list, key=lambda a: float(a.PrecRAh()))
+
+   new_list = []
    for obj in obj_list:  
-      if type(obj_list) is not type([]):
-         obj_list = list(obj_list)
-      new_list = []
-      for obj in obj_list:
-         if only_visible is not None and only_visible and not obj.visible(date):
-            continue
-         if airmass_high is not None and \
-            not 0 < float(obj.airmass(date)) <= airmass_high:
-            continue
-         if rating_low is not None and obj.rating < rating_low:
-            continue
-         new_list.append(obj)
-      obj_list = new_list
+      obj.epoch = date
+      if only_visible is not None and only_visible and not obj.visible():
+         continue
+      if airmass_high is not None and \
+         not 0 < float(obj.airmass()) <= airmass_high:
+         continue
+      if rating_low is not None and obj.rating < rating_low:
+         continue
+      new_list.append(obj)
+   obj_list = new_list
 
    if epoch:
       sdate = epoch.strftime('%m/%d/%y %H:%M:%S')
@@ -100,10 +140,15 @@ def index(request):
    else:
       stz_offset = ""
 
+   # Now deal with telescope position
+   tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
+
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
+      'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
+      'tel_az':tel_az,
       })
    return HttpResponse(t.render(c))
 
@@ -115,24 +160,24 @@ def detail(request, object_id):
    epoch = None
    tz_offset = 0
 
-   if 'object_list_form' in request.session:
-      epoch = str(request.session['object_list_form']['epoch'])
-      tz_offset = float(request.session['object_list_form']['tz_offset'])
-      if tz_offset is None:
-         tz_offset = 0
-      if not epoch:
-         date = ephem.now()
-      else:
-         date = ephem.Date(epoch) - tz_offset*ephem.hour
-   else:
-      epoch = None
+   date = get_current_time(request)
+   obj.epoch = date
 
-   if tz_offset is None:
-      tz_offset = 0
-   if epoch:  
-      date = ephem.Date(epoch) - tz_offset 
-   else:
-      date = ephem.now()
+   if request.method == 'POST':
+      if request.POST['action'] == 'GOTO':
+         request.session['prev_tel_obj'] = request.session.get('cur_tel_obj','Park')
+         request.session['cur_tel_obj'] = obj.name
+         request.session['tel_status'] = 'SLEW'
+      elif request.POST['action'] == "Sync":
+         request.session['prev_tel_obj'] = request.session.get('cur_tel_obj','Park')
+         request.session['tel_status'] = 'IDLE'
+      elif request.POST['action'] == "Cancel":
+         request.session['cur_tel_obj'] = request.session.get('prev_tel_obj','Park')
+         request.session['tel_status'] = 'IDLE'
+
+   cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
+   prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
+   tel_status = request.session.get('tel_status', 'IDLE')
 
    if settings.FINDER_SIZE != settings.FINDER_BASE_SIZE:
       extras += "size=%d&" % (settings.FINDER_SIZE)
@@ -144,11 +189,31 @@ def detail(request, object_id):
       extras += "high=%d&" % (settings.FINDER_HIGH)
    extras = extras[:-1]     # cleanup trailing & or ?
    t = loader.get_template('navigator/object_detail.html')
-   c = Context({
+
+   # Now deal with telescope position
+   if tel_status == "SLEW":
+      tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(prev_tel_obj, date)
+      new_RA,new_DEC,new_ha,new_alt,new_az = telescope_position(cur_tel_obj, date)
+      delta_az = float(new_az) - float(tel_az)
+      if delta_az < -180:
+         delta_az += 360
+      elif delta_az > 180:
+         delta_az -= 360
+      if delta_az > 0:
+         az_move = "Dome East %.2f" % (delta_az)
+      else:
+         az_move = "Dome West %.2f" % (-delta_az)
+   else:
+      az_move = None
+      tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
+   
+   c = RequestContext(request, {
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
       'finder_size':settings.FINDER_SIZE,
-      'message':message, 'error':error, 'epoch':epoch
+      'message':message, 'error':error, 'epoch':epoch,
+      'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
+      'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move
       })
    return HttpResponse(t.render(c))
 
@@ -158,7 +223,6 @@ def search_name(request, object_name):
    if len(objs) == 0:
       error = "No object matching your query was found"
       message = None
-
    else:
       message = "Found %d objects matching your pattern" % len(objs)
 
@@ -207,6 +271,19 @@ def finder(request, objectid):
          response['Content-Disposition'] = 'inline; filename=%s' % \
                (obj.name+".png")
          return response
+      else:
+         response = HttpResponse(obj.finder.read(), content_type="image/png")
+         response['Content-Disposition'] = 'inline; filename=%s' % \
+               (obj.name+".png")
+         return response
+
+   elif obj.objtype == "PARK":
+      response = HttpResponse(obj.finder.read(), content_type="image/png")
+      response['Content-Disposition'] = 'inline; filename=%s' % \
+               (obj.name+".png")
+      return response
+
+
    obj.finder.open()
    # If needed do some transformations
    outstr = StringIO.StringIO()
@@ -245,119 +322,3 @@ def finder(request, objectid):
    response['Content-Disposition'] = 'inline; filename=%s' % obj.finder.name
    return response
 
-class AMFilterForm(forms.Form):
-   airmass_high = forms.FloatField(min_value=1.0, required=False,
-         label='Airmass <',
-         widget=forms.TextInput(attrs={'size':'5'}))
-   epoch = forms.DateTimeField(required=False)
-   rating_low = forms.IntegerField(required=False,
-         label='Rating >=', 
-         widget=forms.TextInput(attrs={'size':'5'}))
-   new_window = forms.BooleanField(required=False, initial=False)
-
-#def am_plot(request):
-#   date = None            # date for which to do the airmass plot
-#   airmass_high = 2.0     # only consider data with airmass < this
-#   rating_low = None       # filter on priority
-#   new_window = False     # Does clicking on object open a new window?
-#
-#   if request.method == "POST" or 'am_plot_form' in request.session:
-#      if request.method == "POST":
-#         if request.POST['action'] == 'Update':
-#            form = AMFilterForm(request.POST)
-#            request.session['am_plot_form'] = request.POST.copy()
-#         else:
-#            form = AMFilterForm()
-#            if 'am_plot_form' in request.session:
-#               del request.session['am_plot_form']
-#      else:
-#         form = AMFilterForm(request.session['am_plot_form'])
-#      if form.is_valid():
-#         date = form.cleaned_data.get('epoch',None)
-#         airmass_high = form.cleaned_data.get('airmass_high',2.0)
-#         if airmass_high is None:  airmass_high = 2.0
-#         rating_low = form.cleaned_data.get('rating_low',None)
-#         new_window = form.cleaned_data.get('new_window', False)
-#   else:
-#      form = AMFilterForm()
-#
-#   objs = Object.objects.all()
-#   keep = []
-#   if rating_low is not None:
-#      for o in objs:
-#         if rating_low is not None and o.rating < rating_low:  continue
-#         keep.append(o)
-#   else:
-#      keep = objs
-#
-#   if date is None:  
-#      date = ephem.now()
-#   else:
-#      date = ephem.Date(date)
-#   embed_image = plot_ams_phases.plot_ams_map(keep, date=date,
-#         max_am = airmass_high, new_window=new_window)
-#   t = loader.get_template('navigator/am_plot.html')
-#   c = RequestContext(request, {
-#      'embed_image':embed_image, 'form':form, 'date':date, 'new_window':new_window,
-#      })
-#   return HttpResponse(t.render(c))
-#
-#
-#def am_ha_plot(request):
-#   only_visbile = None
-#   airmass_high = 2.0
-#   epoch = None
-#   rating_low = None
-#   new_window = False
-#   if request.method == "POST" or 'object_list_form' in request.session:
-#      if request.method == "POST":
-#         if request.POST['action'] == 'Update':
-#            form = FilterForm(request.POST)
-#            # save this form info into the session cache
-#            request.session['object_list_form'] = request.POST.copy()
-#         else:
-#            form = FilterForm()
-#            if 'object_list_form' in request.session:
-#               del request.session['object_list_form']
-#      else:
-#         form = FilterForm(request.session['object_list_form'])
-#      if form.is_valid():
-#         only_visible = form.cleaned_data.get('only_visible',None)
-#         airmass_high = form.cleaned_data.get('airmass_high',2.0)
-#         epoch = form.cleaned_data.get('epoch',None)
-#         rating_low = form.cleaned_data.get('rating_low',None)
-#         new_window = form.cleaned_data.get('new_window', False)
-#   else:
-#      form = FilterForm()
-#
-#   if epoch:
-#      date = ephem.Date(epoch)
-#   else:
-#      date = ephem.now()
-#
-#   obj_list = Object.objects.all().order_by('name')
-#
-#   if only_visible is not None or airmass_high is not None or \
-#      rating_low is not None:
-#      # Apply the filters
-#      if type(obj_list) is not type([]):
-#         obj_list = list(obj_list)
-#      new_list = []
-#      for obj in obj_list:
-#         obj.epoch = date
-#         if only_visible is not None and not obj.visible(date):
-#            continue
-#         if airmass_high is not None and not 0 < float(obj.airmass()) <= airmass_high:
-#            continue
-#         if rating_low is not None and obj.rating < rating_low:
-#            continue
-#         new_list.append(obj)
-#      obj_list = new_list
-#
-#   embed_image = plot_ams_HA.plot_ams_map(obj_list, date=date, 
-#         new_window=new_window, airmass_high=airmass_high)
-#   t = loader.get_template('navigator/am_ha_plot.html')
-#   c = RequestContext(request, {
-#      'embed_image':embed_image, 'form':form, 'date':date, 'new_window':new_window,
-#      })
-#   return HttpResponse(t.render(c))

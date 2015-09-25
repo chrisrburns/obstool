@@ -46,16 +46,42 @@
 </div>
 <div id="content-related" style="margin-right: -25em;">
    {# filters #}
+   <div class="module" id="tinfo">
+      <h2>Telescope Position</h2>
+      <table border=0>
+         <tr>
+            <td>RA:</td><td> {{ tel_RA }} </td>
+         </tr>
+         <tr>
+            <td>DEC:</td><td> {{ tel_DEC }} </td>
+         </tr>
+         <tr>
+            <td>HA:</td><td> {{ tel_ha }} </td>
+         </tr>
+         <tr>
+            <td>Alt:</td><td> {{ tel_alt }}&deg; </td>
+         </tr>
+         <tr>
+            <td>Az:</td><td> {{ tel_az }}&deg;</td>
+         </tr>
+      </table>
+      <br>
+      <form action="" method="POST">{% csrf_token %}
+         <input type=submit name='action' value='Park'>
+      </form>
+   </div>
+
    <form action="" method="post">{% csrf_token %}
    <div class="module" id="settings">
       <h2>Settings</h2>
       Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
       <div style="text-align: center;">
-         <font size=-2>(mm/dd/yyyy hh:mm:ss)<br>Blank = now </font>
+         <font size=-2>(yyyy-mm-dd hh:mm:ss)<br>Blank = now </font>
       </div><br>
       UTC offset: {{ form.tz_offset.errors }} {{ form.tz_offset }}<br>
       <div style="text-align: center;">
-         <font size=-2>(negative == West)</font>
+         <font size=-2>PDT = -8<br>
+                       PST = -7</font>
       </div><br>
       {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
 

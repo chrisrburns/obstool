@@ -1,43 +1,46 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-<head>
-<title>{% block title %}{% endblock %}</title>
-<link rel="stylesheet" type="text/css" href="/media/css/base.css" />
-{% block style %}{% endblock %}
-<meta name="robots" content="NONE,NOARCHIVE" />
-</head>
-<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+  <head>
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="/media/css/base.css" />
+    {% block style %}{% endblock %}
+    <meta name="robots" content="NONE,NOARCHIVE" />
+  </head>
+  <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
 
-<!-- Container -->
-<div id="container">
-
-    {% if not is_popup %}
-    <!-- Header -->
-    <div id="header">
-        <div id="branding">
-        {% block branding %}{% endblock %}
-        </div>
+    <!-- Container -->
+    <div id="container">
+ 
+      {% if not is_popup %}
+         <!-- Header -->
+         <div id="header">
+           <div id="branding">
+             {% block branding %}{% endblock %}
+           </div>
+         </div>
+         <!-- END Header -->
+         {% block breadcrumbs %}
+            <div class="breadcrumbs"><a href="/navigator">Home</a>
+               {% if title %} &rsaquo; {{ title }}{% endif %}
+            </div>
+         {% endblock %}
+      {% endif %}
+ 
+      <!-- Content -->
+      <div id="content"> 
+          {% block pretitle %}{% endblock %}
+          {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+          {% block content %}
+          {% block object-tools %}{% endblock %}
+          {{ content }}
+          {% endblock %}
+          {% block sidebar %}{% endblock %}
+          <br class="clear" />
+      </div>
+      <!-- END Content -->
+ 
+      {% block footer %}<div id="footer"></div>{% endblock %}
     </div>
-    <!-- END Header -->
-    {% block breadcrumbs %}<div class="breadcrumbs"><a href="/navigator">Home</a>{% if title %} &rsaquo; {{ title }}{% endif %}</div>{% endblock %}
-    {% endif %}
-
-    <!-- Content -->
-    <div id="content"> 
-        {% block pretitle %}{% endblock %}
-        {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
-        {% block content %}
-        {% block object-tools %}{% endblock %}
-        {{ content }}
-        {% endblock %}
-        {% block sidebar %}{% endblock %}
-        <br class="clear" />
-    </div>
-    <!-- END Content -->
-
-    {% block footer %}<div id="footer"></div>{% endblock %}
-</div>
-<!-- END Container -->
-
-</body>
+    <!-- END Container -->
+  </body>
 </html>

@@ -1,48 +1,90 @@
 {% extends "base_site.html" %}
 {% load myfilters %}
 {% block style %}
-<script src="/media/js/sorttable.js"></script>
+  <script src="/media/js/sorttable.js"></script>
 {% endblock %}
-{% block breadcrumbs %}<div class="breadcrumbs">
-   <a href="../..">Home</a> &rsaquo;
-   <a href="..">Object Listing</a> &rsaquo;
-   {{ object.name }} </div> {% endblock %}
-{% block pretitle %} <h2> {{ object.name }} </h2> {% endblock %}
-{% block content %}
-<div id="content-main" style="width:300px;float: left;">
-<h1> RA:  {{ object.PrecRAh }}<br>
-     DEC: {{ object.PrecDECd }}<br>
-     AZ:  {{ object.azimuth|format:"%.2f" }}<br>
-     ALT:  {{ object.altitude|format:"%.2f" }}<br></h1>
-  <P>
-  <table cellspacing="0" border=0>
-     <tr><td>Description:</td><td> {{ object.descr }}</td></tr>
-     <tr><td>Type:</td><td> {{ object.objtype }}</td></tr>
-     <tr><td>RA/DEC (J2000): </td><td> {{ object.RA|angle2hms }} {{ object.DEC|angle2dms }} </td></tr>
-     <tr><td>Size: </td><td> {{ object.ssize }} </td></tr>
-     <tr><td>Vmag: </td><td> {{ object.sMv }} </td></tr>
-     <tr><td>Distance: </td><td> {{ object.sdistance }} </td></tr>
-     <tr><td>Dark Sky?: </td><td> {% if obj.dark %}D{% endif %} </td></tr>
-     <tr><td>Rating: </td><td> {{ object.srating|safe }} </td></tr>
-  </table>
-  <br>
-  {% if message %}
-     <div style="background: #eeffcc;"> 
-        <img src="/media/img/admin/icon_success.gif"> 
-        &nbsp;&nbsp;{{ message }} 
-     </div>
-  {% endif %}
-  {% if error %}
-     <div style="background: red; color: white;">
-        <img src="/media/img/admin/icon_alert.gif"> 
-        &nbsp;&nbsp; {{ error }} 
-     </div>
-  {% endif %}
-</div>
-<div style="width:300px; float:left;">
-   <a href="finder{{extras}}">
-      <img src="finder{{extras}}" width=400></a>
-   <br><font size=-2>{{ finder_size }}X{{ finder_size }} arc-minutes.<br>Orientation: {{ finder_orientation }}</font>
-</div>
 
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+     <a href="../..">Home</a> &rsaquo;
+     <a href="..">Object Listing</a> &rsaquo;
+     {{ object.name }} 
+  </div> 
+{% endblock %}
+
+{% block pretitle %} 
+  <h2> {{ object.name }} </h2> 
+{% endblock %}
+{% block content %}
+  <div id="content-main" style="width:300px;float: left;">
+    <h1> RA:  {{ object.PrecRAh }}<br>
+         DEC: {{ object.PrecDecd }}<br>
+         AZ:  {{ object.azimuth|format:"%.2f" }}<br>
+         ALT:  {{ object.altitude|format:"%.2f" }}<br>
+    </h1>
+    <P>
+    <form action="" method="post">{% csrf_token %}
+       {% if tel_status == "SLEW" %}
+       <font color='red'>{{ az_move }}</font><br>
+          <input type='submit' name='action' value='Sync'>
+          <input type='submit' name='action' value='Cancel'>
+       {% else %}
+          <input type='submit' name='action' value='GOTO'>
+       {% endif %}
+    </form>
+    <table cellspacing="0" border=0>
+       <tr><td>Description:</td><td> {{ object.descr }}</td></tr>
+       <tr><td>Type:</td><td> {{ object.objtype }}</td></tr>
+       <tr><td>RA/DEC (J2000): </td><td> {{ object.RA|angle2hms }} 
+                                        {{ object.DEC|angle2dms }} </td></tr>
+       <tr><td>Size: </td><td> {{ object.ssize }} </td></tr>
+       <tr><td>Vmag: </td><td> {{ object.sMv }} </td></tr>
+       <tr><td>Distance: </td><td> {{ object.sdistance }} </td></tr>
+       <tr><td>Dark Sky?: </td><td> {% if obj.dark %}D{% endif %} </td></tr>
+       <tr><td>Rating: </td><td> {{ object.srating|safe }} </td></tr>
+    </table>
+    <br>
+    {% if message %}
+       <div style="background: #eeffcc;"> 
+          <img src="/media/img/admin/icon_success.gif"> 
+             &nbsp;&nbsp;{{ message }} 
+       </div>
+    {% endif %}
+    {% if error %}
+      <div style="background: red; color: white;">
+        <img src="/media/img/admin/icon_alert.gif"> 
+          &nbsp;&nbsp; {{ error }} 
+      </div>
+    {% endif %}
+  </div>
+  <div style="width:310px; float:left;">
+     <a href="finder">
+        <img src="finder{{extras}}" width=300>
+     </a>
+     <br><font size=-2>{{ finder_size }}X{{ finder_size }} 
+        arc-minutes.<br>Orientation: {{ finder_orientation }}</font>
+  </div>
+  <div id="content-related" style="margin-right: -25em;">
+    <div class="module" id="tinfo">
+       <h2>Telescope Position</h2>
+       <table border=0>
+          <tr>
+             <td>RA:</td><td> {{ tel_RA }} </td>
+          </tr>
+          <tr>
+             <td>DEC:</td><td> {{ tel_DEC }} </td>
+          </tr>
+          <tr>
+             <td>HA:</td><td> {{ tel_ha }} </td>
+          </tr>
+          <tr>
+             <td>Alt:</td><td> {{ tel_alt }}&deg; </td>
+          </tr>
+          <tr>
+             <td>Az:</td><td> {{ tel_az }}&deg;</td>
+          </tr>
+       </table>
+       <br>
+    </div>
+  </div>
 {% endblock %}
