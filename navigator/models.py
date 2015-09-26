@@ -1,17 +1,13 @@
 from django.db import models
 import ephem
 from math import pi,cos
-
-# The limit for rise/set of the objects.
-ALT_LIMIT = 32.0
-# The altitude of an object where we're a bit worried.
-ALT_SOFT_LIMIT = 40.0
+from obstool import settings
 
 def genMWO(date=None):
    MWO = ephem.Observer()
-   MWO.long = "-118.0590"
-   MWO.lat = "34.2170"
-   MWO.elev = 1579
+   MWO.long = settings.OBSERVING_LONG
+   MWO.lat = settings.OBSERVING_LAT
+   MWO.elev = settings.OBSERVING_ELEV
    if date is not None:
       MWO.date = date
    else:
@@ -38,7 +34,7 @@ class Object(models.Model):
       return unicode(self.name)
    
    def rah(self):
-      '''Get the RA in hh:mm:ss.ss format'''
+      '''Get the RA in hh:mm:ss.ss format, returns a string'''
       if self.objtype == 'PARK':
          # Park position is at meridian
          obs = genMWO(self.MWO)
@@ -50,7 +46,7 @@ class Object(models.Model):
       return ra
 
    def decd(self):
-      '''Get the Dec in dd:mm:ss.ss format'''
+      '''Get the Dec in dd:mm:ss.ss format, returns a string'''
       dec = ephem.degrees(self.DEC*pi/180.)
       return str(dec)
 
@@ -74,14 +70,14 @@ class Object(models.Model):
       return star
 
    def PrecRAh(self):
-      '''Return the precessed RA to date'''
+      '''Return the precessed RA to date as an ephem angle'''
       MWO = genMWO(self.epoch)
       star = self.genobj()
       star.compute(MWO)
       return (star.ra)
 
    def PrecDecd(self):
-      '''Return the precessed Declination to date'''
+      '''Return the precessed Declination to date as an ephem angle'''
       #if self.objtype == 'PARK':
       #   return ephem.degrees('34:13:28.8')
       MWO = genMWO(self.epoch)
@@ -90,6 +86,7 @@ class Object(models.Model):
       return (star.dec)
 
    def hour_angle(self):
+      '''Returns the hour-angle in decimal hours'''
       #if self.obj == 'PARK':
       #   return 0.0
       MWO = genMWO(self.epoch)
@@ -98,6 +95,7 @@ class Object(models.Model):
       return (MWO.sidereal_time() - star.ra)*180./pi/15.0
 
    def airmass(self):
+      '''returns a string value of the airmass'''
       alt = self.altitude()
       if alt < 0:
          return "-1.0"
@@ -105,6 +103,7 @@ class Object(models.Model):
       return "%.3f" % airmass
 
    def sdistance(self):
+      '''Returns the distance as a nicely formatted string.'''
       dist = self.distance
       if self.objtype == 'SS':
          MWO = genMWO(self.epoch)
@@ -120,20 +119,22 @@ class Object(models.Model):
       return "%.1f Gly" % (dist/1e9)
 
    def const(self):
+      '''Returns the constellation the object is current in
+      as a 3-letter code.'''
       MWO = genMWO(self.epoch)
       star = self.genobj()
       star.compute(MWO)
       return ephem.constellation(star)[0]
 
    def altitude(self):
-      '''Compute the altitude of the object'''
+      '''Compute the altitude of the object in degrees'''
       MWO = genMWO(self.epoch)
       star = self.genobj()
       star.compute(MWO)
       return star.alt*180.0/pi
 
    def azimuth(self):
-      '''Compute the altitude of the object'''
+      '''Compute the altitude of the object in degrees'''
       if self.objtype == 'PARK':
          # dome azimuth is NE in park position
          return 45.0
@@ -143,6 +144,7 @@ class Object(models.Model):
       return star.az*180.0/pi
 
    def ssize(self):
+      '''Return a string formatted size of the object'''
       if self.objtype == 'SS':
          MWO = genMWO(self.epoch)
          star = self.genobj()
@@ -151,6 +153,7 @@ class Object(models.Model):
       return self.size
 
    def sMv(self):
+      '''Return a formatted string for the star's magnitude.'''
       if self.objtype == 'SS':
          MWO = genMWO(self.epoch)
          star = self.genobj()
@@ -158,31 +161,34 @@ class Object(models.Model):
          return '%.2f' % (star.mag)
 
    def srating(self):
+      '''Returns an HTML star rating.'''
       return "&#9734;"*self.rating
 
    def visible(self):
-      return self.altitude() > ALT_LIMIT
+      '''Returns True/False whether object is visible'''
+      return self.altitude() > settings.ALT_LIMIT
 
    def settime(self):
-      MWO = getMWO(self.epoch)
-      MWO.horizon = degrees(ALT_LIMIT*pi/180.)
+      '''Remaining time before the object sets, nicely formatted.'''
+      MWO = genMWO(self.epoch)
+      MWO.horizon = ephem.degrees(settings.ALT_LIMIT*pi/180.)
       star = self.genobj()
       try:
          settime = MWO.next_setting(star)
-      except ephem.AlwaysUpError,ephem.NeverUpEror:
+      except:
          return "-"
-      dt = (settime - self.epoch)*24   # days
+      dt = (settime - self.epoch)*24   # hours
       if dt >= 1:
          return "%.1f h" % dt
       dt = dt*60                       #minutes
       if dt >=1 :
          return "%.1f m" % dt
-      dt = dt*3600
+      dt = dt*60                       # seconds
       return "%.1f s" % dt
 
 
    def low(self):
-      return ALT_SOFT_LIMIT < self.altitude() < ALT_LIMIT
+      return settings.ALT_SOFT_LIMIT < self.altitude() < settings.ALT_LIMIT
 
    def savename(self):
       '''return a name safe for filenames'''

@@ -13,12 +13,12 @@
       <table class='sortable' cellspacing="0" border=1 id="result_list">
          <thead>
             <tr>
-               <th>Dark?</th>
                <th>Rating</th>
                <th>Name</th>
                <th>RA</th>
                <th>DEC</th>
                <th>HA</th>
+               <th>Set</th>
                <th>size/sep</th>
                <th>Type</th>
                <th>Description</th>
@@ -27,12 +27,12 @@
          <tbody>
             {% for obj in object_list %}
             <tr class="{% cycle 'row1' 'row2' %}">
-               <td>{% if obj.dark %}D{% endif %}</td>
-               <td>{{ obj.srating|safe }}</td>
+               <td>{{ obj.srating|safe }}{% if obj.dark %}&nbsp;D{% endif %}</td>
                <th><a href="{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
                <td>{{ obj.PrecRAh }}</td>
                <td>{{ obj.PrecDecd }}</td>
                <td>{{ obj.hour_angle|format:"%.1f" }}</td>
+               <td>{{ obj.settime }} </td>
                <td>{{ obj.ssize }}</td>
                <td>{{ obj.objtype }}</td>
                <td>{{ obj.descr }} </td>

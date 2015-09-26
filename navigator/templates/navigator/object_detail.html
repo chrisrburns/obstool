@@ -63,6 +63,14 @@
      </a>
      <br><font size=-2>{{ finder_size }}X{{ finder_size }} 
         arc-minutes.<br>Orientation: {{ finder_orientation }}</font>
+     <form action="" method="post">{% csrf_token %}
+        {% for key,value in eyepieces.items %}
+           <input type='submit' name='eyepiece' 
+              value="{{ key }}"
+              {%if cur_eyepiece == key %} disabled {% endif %}
+              >
+        {% endfor %}
+     </form>
   </div>
   <div id="content-related" style="margin-right: -25em;">
     <div class="module" id="tinfo">

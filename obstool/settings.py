@@ -15,6 +15,25 @@ import os
 
 # Here are some site-wide configuration settings that can be changed 
 # on a per-user basis:
+# The 3-D position of the observing site
+OBSERVING_LONG = "-118.0590"
+OBSERVING_LAT = "34.2170"
+OBSERVING_ELEV = 1579
+
+# The effective horizon for the observing site.  For now, this is just a
+# constant altitude, but later maybe user can specify a real horizon
+# as alt/az points?
+ALT_LIMIT = 32.0
+# This is a soft limit that maybe the user should be worried
+ALT_SOFT_LIMIT = 40.0
+
+# eyepieces and field-of-views
+fovs = {
+        '50mm':6,
+        '80mm':9,
+        '100mm':11,
+        }
+
 FINDER_BASE_SIZE=60      # arc-min
 FINDER_SIZE=10      # arc-min
 FINDER_FLIP=None # default finder is North up, East left.  Specify

@@ -162,25 +162,38 @@ def detail(request, object_id):
 
    date = get_current_time(request)
    obj.epoch = date
+   
 
    if request.method == 'POST':
-      if request.POST['action'] == 'GOTO':
-         request.session['prev_tel_obj'] = request.session.get('cur_tel_obj','Park')
-         request.session['cur_tel_obj'] = obj.name
-         request.session['tel_status'] = 'SLEW'
-      elif request.POST['action'] == "Sync":
-         request.session['prev_tel_obj'] = request.session.get('cur_tel_obj','Park')
-         request.session['tel_status'] = 'IDLE'
-      elif request.POST['action'] == "Cancel":
-         request.session['cur_tel_obj'] = request.session.get('prev_tel_obj','Park')
-         request.session['tel_status'] = 'IDLE'
+      if 'action' in request.POST:
+         if request.POST['action'] == 'GOTO':
+            request.session['prev_tel_obj'] = request.session.get('cur_tel_obj',
+                                                                  'Park')
+            request.session['cur_tel_obj'] = obj.name
+            request.session['tel_status'] = 'SLEW'
+         elif request.POST['action'] == "Sync":
+            request.session['prev_tel_obj'] = request.session.get('cur_tel_obj',
+                                                                  'Park')
+            request.session['tel_status'] = 'IDLE'
+         elif request.POST['action'] == "Cancel":
+            request.session['cur_tel_obj'] = request.session.get('prev_tel_obj',
+                                                                 'Park')
+            request.session['tel_status'] = 'IDLE'
+      elif 'eyepiece' in request.POST:
+         request.session['cur_eye'] = request.POST['eyepiece']
 
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
    tel_status = request.session.get('tel_status', 'IDLE')
 
-   if settings.FINDER_SIZE != settings.FINDER_BASE_SIZE:
-      extras += "size=%d&" % (settings.FINDER_SIZE)
+   eyepiece = request.session.get('cur_eye', None)
+   if eyepiece is not None:
+      FOV = settings.fovs[eyepiece]
+   else:
+      FOV = settings.FINDER_SIZE
+
+   if FOV != settings.FINDER_BASE_SIZE:
+      extras += "size=%d&" % (FOV)
    if settings.FINDER_REVERSE:
       extras += "reverse=1&"
    if settings.FINDER_LOW:
@@ -210,7 +223,8 @@ def detail(request, object_id):
    c = RequestContext(request, {
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
-      'finder_size':settings.FINDER_SIZE,
+      'finder_size':FOV,
+      'eyepieces':settings.fovs,'cur_eyepiece':eyepiece,
       'message':message, 'error':error, 'epoch':epoch,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move
