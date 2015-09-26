@@ -134,7 +134,8 @@ def index(request):
    if epoch:
       sdate = epoch.strftime('%m/%d/%y %H:%M:%S')
    else:
-      sdate = ephem.now().datetime().strftime('%m/%d/%y %H:%M:%S')
+      sdate = ephem.Date(ephem.now()+tz_offset*ephem.hour)
+      sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
    if tz_offset != 0:
       stz_offset = "%.1f" % (tz_offset)
    else:
@@ -276,7 +277,7 @@ def finder(request, objectid):
          if not epoch:
             date = ephem.now()
          else:
-            date = ephem.Date(epoch) - tz_offset*ephem.hour
+            date = ephem.Date(ephem.Date(epoch) - tz_offset*ephem.hour)
       else:
          date = ephem.now()
       content = get_planets.get_image(obj.name, date, size)

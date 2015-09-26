@@ -1,4 +1,5 @@
 {% extends "base_site.html" %}
+      Allow from all
 {% load myfilters %}
 {% block style %}
 <script src="/media/js/sorttable.js"></script>
@@ -80,8 +81,8 @@
       </div><br>
       UTC offset: {{ form.tz_offset.errors }} {{ form.tz_offset }}<br>
       <div style="text-align: center;">
-         <font size=-2>PDT = -8<br>
-                       PST = -7</font>
+         <font size=-2>PDT = -7<br>
+                       PST = -8</font>
       </div><br>
       {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
 
