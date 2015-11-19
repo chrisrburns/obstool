@@ -27,8 +27,8 @@ rotations = {'90':Image.ROTATE_90,
              '-90':Image.ROTATE_270}
 
 class FilterForm(forms.Form):
-   airmass_high = forms.FloatField(min_value=1.0, required=False,
-         label='Airmass <', initial=2.0,
+   ha_high = forms.FloatField(min_value=0.0, required=False,
+         label='|HA| <', initial=settings.HA_SOFT_LIMIT,
          widget=forms.TextInput(attrs={'size':'5'}))
    rating_low = forms.IntegerField(required=False,
          label='rating >', initial=0,
@@ -60,8 +60,9 @@ def get_current_time(request):
    return date
 
 def telescope_position(obj_name,date):
-   '''Given an RA/DEC, return hour-angle, altitude, and azimuth as strings.
-   RA and DEC are assumed to be at the epoch 'date' (ie., have been precessed)'''
+   '''Given an object name and date, return the precessed RA, DEC, hour-angle,
+   altitude, and azimuth as strings.
+   '''
    obj = Object.objects.get(name=obj_name)
    obj.epoch = date
    return (obj.PrecRAh(),
@@ -72,7 +73,7 @@ def telescope_position(obj_name,date):
 
 def index(request):
    only_visible = None
-   airmass_high = 2.0
+   ha_high = settings.HA_SOFT_LIMIT
    epoch = None
    rating_low = None
    new_window = False
@@ -100,7 +101,7 @@ def index(request):
 
    if form.is_valid():
       only_visible = form.cleaned_data.get('only_visible',None)
-      airmass_high = form.cleaned_data.get('airmass_high',2.0)
+      ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
       rating_low = form.cleaned_data.get('rating_low',None)
       epoch = form.cleaned_data.get('epoch',None)
       tz_offset =form.cleaned_data.get('tz_offset', 0)
@@ -113,18 +114,22 @@ def index(request):
    else:
       date = ephem.now()
 
+   # Now deal with telescope position
+   tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
+
    obj_list = Object.objects.all()
    for obj in obj_list:
       obj.epoch = date
+      obj.tel_az = float(tel_az)
    obj_list = sorted(obj_list, key=lambda a: float(a.PrecRAh()))
 
    new_list = []
    for obj in obj_list:  
-      obj.epoch = date
+      #obj.epoch = date
       if only_visible is not None and only_visible and not obj.visible():
          continue
-      if airmass_high is not None and \
-         not 0 < float(obj.airmass()) <= airmass_high:
+      if ha_high is not None and \
+         abs(obj.hour_angle()) <= ha_high:
          continue
       if rating_low is not None and obj.rating < rating_low:
          continue
@@ -140,9 +145,6 @@ def index(request):
       stz_offset = "%.1f" % (tz_offset)
    else:
       stz_offset = ""
-
-   # Now deal with telescope position
-   tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
 
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {

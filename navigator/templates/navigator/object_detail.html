@@ -6,7 +6,7 @@
 
 {% block breadcrumbs %}
   <div class="breadcrumbs">
-     <a href="../..">Home</a> &rsaquo;
+     <a href="../../index.html">Home</a> &rsaquo;
      <a href="..">Object Listing</a> &rsaquo;
      {{ object.name }} 
   </div> 
@@ -19,8 +19,9 @@
   <div id="content-main" style="width:300px;float: left;">
     <h1> RA:  {{ object.PrecRAh }}<br>
          DEC: {{ object.PrecDecd }}<br>
-         AZ:  {{ object.azimuth|format:"%.2f" }}<br>
-         ALT:  {{ object.altitude|format:"%.2f" }}<br>
+         HA: {{ object.hour_angle|format:"%.1f" }} hr<br>
+         AZ:  {{ object.azimuth|format:"%.2f" }}&deg;<br>
+         ALT:  {{ object.altitude|format:"%.2f" }}&deg;<br>
     </h1>
     <P>
     <form action="" method="post">{% csrf_token %}

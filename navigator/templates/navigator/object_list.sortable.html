@@ -4,21 +4,20 @@
 {% block style %}
 <script src="/media/js/sorttable.js"></script>
 {% endblock %}
-{% block breadcrumbs %}<div class="breadcrumbs"><a href="..">Home</a> &rsaquo;Object Listing</div> {% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="../index.html">Home</a> &rsaquo;Object Listing</div> {% endblock %}
 {% block pretitle %} <h2>Object Listing for {{date}} (UT{{ tz_offset }})</h2> {% endblock %}
 {% block content %}
 <div id="content-main">
    {% if object_list %}
-      Showing {{ object_list|length }} objects<br>
-      <font size=-3 color="grey">Click on table headers to sort</font>
+      <!-- Showing {{ object_list|length }} objects<br>
+      <font size=-3 color="grey">Click on table headers to sort</font> -->
       <table class='sortable' cellspacing="0" border=1 id="result_list">
          <thead>
             <tr>
                <th>Rating</th>
                <th>Name</th>
-               <th>RA</th>
-               <th>DEC</th>
                <th>HA</th>
+               <th>&Delta;Az</th>
                <th>Set</th>
                <th>size/sep</th>
                <th>Type</th>
@@ -30,9 +29,8 @@
             <tr class="{% cycle 'row1' 'row2' %}">
                <td>{{ obj.srating|safe }}{% if obj.dark %}&nbsp;D{% endif %}</td>
                <th><a href="{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
-               <td>{{ obj.PrecRAh }}</td>
-               <td>{{ obj.PrecDecd }}</td>
                <td>{{ obj.hour_angle|format:"%.1f" }}</td>
+               <td>{{ obj.dazimuth }} </td>
                <td>{{ obj.settime }} </td>
                <td>{{ obj.ssize }}</td>
                <td>{{ obj.objtype }}</td>
@@ -93,7 +91,7 @@
          {{ form.non_field_errors }}
          {{ form.rating_low.errors }} {{ form.rating_low}}
          <br>
-         Airmass &le; {{ form.airmass_low.errors }} {{ form.airmass_high}}
+         |HA| &le; {{ form.ha_high.errors }} {{ form.ha_high}}
          <br>
          {{ form.only_visible.errors }}
          <label for="id_only_visible">Only visible:</label> {{ form.only_visible }}

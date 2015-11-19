@@ -26,6 +26,10 @@ OBSERVING_ELEV = 1579
 ALT_LIMIT = 32.0
 # This is a soft limit that maybe the user should be worried
 ALT_SOFT_LIMIT = 40.0
+# An hour-angle limit
+HA_LIMIT = 4.0
+# This is a soft limit that maybe the user should be worried
+HA_SOFT_LIMIT = 3.0
 
 # eyepieces and field-of-views
 fovs = {
@@ -58,6 +62,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+SITE_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 # Application definition
