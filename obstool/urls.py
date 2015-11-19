@@ -16,11 +16,13 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic.base import TemplateView
-from settings import MEDIA_ROOT
+from settings import MEDIA_ROOT,SITE_ROOT
 
 urlpatterns = [
     url(r'^navigator/', include('navigator.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve',
        {'document_root':MEDIA_ROOT}),
+    url(r'(?P<path>.*)$', 'django.views.static.serve',
+               {'document_root':SITE_ROOT}),
 ]

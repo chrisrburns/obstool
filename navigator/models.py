@@ -28,6 +28,7 @@ class Object(models.Model):
    dark = models.BooleanField()   # Dark skies required?
    finder = models.ImageField(upload_to='finders', default='default.gif')
    epoch = None
+   tel_az = None
    
    
    def __unicode__(self):
@@ -143,6 +144,25 @@ class Object(models.Model):
       star.compute(MWO)
       return star.az*180.0/pi
 
+   def dazimuth(self):
+      '''Compute the delta-azimuth of the object w.r.t. current position,
+      given by self.cur_az.'''
+      if self.tel_az is None:
+         tel_az = 45.0
+      else:
+         tel_az = self.tel_az
+      new_az = self.azimuth()
+      delta_az = new_az - tel_az
+      if delta_az < -180:
+         delta_az += 360
+      elif delta_az > 180:
+         delta_az -= 360
+      if delta_az > 0:
+         return "%.1fE" % (delta_az)
+      else:
+         return "%.1fW" % (-delta_az)
+         
+
    def ssize(self):
       '''Return a string formatted size of the object'''
       if self.objtype == 'SS':
@@ -166,7 +186,8 @@ class Object(models.Model):
 
    def visible(self):
       '''Returns True/False whether object is visible'''
-      return self.altitude() > settings.ALT_LIMIT
+      return self.altitude() > settings.ALT_LIMIT and \
+             abs(self.hour_angle()) < settings.HA_LIMIT
 
    def settime(self):
       '''Remaining time before the object sets, nicely formatted.'''

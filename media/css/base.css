@@ -665,6 +665,7 @@ table#change-history tbody th {
 #content-related {
     float: left;
     width: 18em;
+    padding: 10px 0px 0px 0px;
 }
 
 #footer {
