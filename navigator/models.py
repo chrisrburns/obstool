@@ -93,7 +93,14 @@ class Object(models.Model):
       MWO = genMWO(self.epoch)
       star = self.genobj()
       star.compute(MWO)
-      return (MWO.sidereal_time() - star.ra)*180./pi/15.0
+      ha = (MWO.sidereal_time() - star.ra)*180./pi/15.0  # In hours
+      if ha < 0: ha += 24
+      if ha > 24: ha -=24
+      # HA is now 0 < HA < 24
+      # Take the convention that HA < 0 is East, HA > 0 is West
+      if ha > 12:
+         ha = ha - 24
+      return ha
 
    def airmass(self):
       '''returns a string value of the airmass'''

@@ -117,6 +117,8 @@ def index(request):
    # Now deal with telescope position
    tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
 
+   obs = genMWO(date)
+   sid_time = str(obs.sidereal_time())
    obj_list = Object.objects.all()
    for obj in obj_list:
       obj.epoch = date
@@ -129,7 +131,7 @@ def index(request):
       if only_visible is not None and only_visible and not obj.visible():
          continue
       if ha_high is not None and \
-         abs(obj.hour_angle()) <= ha_high:
+         abs(obj.hour_angle()) > ha_high:
          continue
       if rating_low is not None and obj.rating < rating_low:
          continue
@@ -151,7 +153,7 @@ def index(request):
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
-      'tel_az':tel_az,
+      'tel_az':tel_az,'sid_time':sid_time,
       })
    return HttpResponse(t.render(c))
 
