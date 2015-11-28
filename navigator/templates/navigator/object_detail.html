@@ -3,30 +3,14 @@
 {% block style %}
   <script src="/media/js/sorttable.js"></script>
   <script type="text/javascript" src="/media/js/paper.js"></script>
-  <script type="text/paperscript" canvas="myCanvas">
-     var cent = view.center;
-     var width = cent.x*2;
-     var height = cent.y*2;
-     var tel_width = 30;
-     var tel_length = width/2-20;
-     var dome = new Path.Circle({
-        center: cent,
-        radius: width/2-10,
-        strokeColor: 'black'
-     });
-     var ll = new Point(0,height/2); var ur = new Point(width,height);
-     var rect = new Rectangle(ll, ur);
-     var blk = new Path.Rectangle(rect);
-     blk.fillColor = 'white'
-     var rect = new Rectangle(new Point(10,height/2), new Point(width-10,height-80));
-     var bot = new Path.Rectangle(rect);
-     bot.strokeColor = 'black';
-     var rect = new Rectangle(new Point(cent.x-10, cent.y-tel_width/2), 
-                              new Point(cent.x+tel_length,cent.y+tel_width/2));
-     var tel = new Path.Rectangle(rect);
-     tel.strokeColor='black';
-     tel.rotate(-{{ object.altitude}}, cent);
-
+  <script type="text/javascript" src="/media/js/telescope.js"></script>
+  <script type="text/javascript">
+     window.onload = function() {
+        paper.setup('myCanvas');
+        azDome = draw_dome(0.9, 0.2, {{ object.altitude }}, 
+              {{ object.azimuth }});
+        view.draw();
+     }
   </script>
 {% endblock %}
 
@@ -84,9 +68,9 @@
       </div>
     {% endif %}
   </div>
-  <div style="width:310px; float:left;">
+  <div style="padding: 10px 0px 0px 0px; width:260px; float:left;">
      <a href="finder">
-        <img src="finder{{extras}}" width=300>
+        <img src="finder{{extras}}" width=250>
      </a>
      <br><font size=-2>{{ finder_size }}X{{ finder_size }} 
         arc-minutes.<br>Orientation: {{ finder_orientation }}</font>
@@ -122,7 +106,7 @@
        <br>
     </div>
     <div class="module" id="canvas">
-       <canvas id="myCanvas" width=216 height=216></canvas>
+       <canvas id="myCanvas" width=150 height=300></canvas>
     </div>
   </div>
 {% endblock %}
