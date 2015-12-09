@@ -3,6 +3,30 @@
 {% load myfilters %}
 {% block style %}
 <script src="/media/js/sorttable.js"></script>
+<script type="text/javascript">
+   function hide_section(element) {
+      xhttp = new XMLHttpRequest();
+      id = element.parentNode.parentNode.id;
+      els = element.parentNode.parentNode.children;
+      getstr = "update_session";
+      sendstr = "csrfmiddlewaretoken={{ csrf_token }}&var=module_display&key="+id+"&val=";
+      for (var i = 0 ; i < els.length ; i++) {
+         if (els[i].tagName != "H2") {
+            if (els[i].style.display == 'none') {
+               xhttp.open("POST", getstr, true);
+               xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+               xhttp.send(sendstr+"inline");
+               els[i].style.display = "inline";
+            } else {
+               els[i].style.display = "none";
+               xhttp.open("POST", getstr, true);
+               xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+               xhttp.send(sendstr+"none");
+            }
+         }
+      }
+   }
+</script>
 {% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="../index.html">Home</a> &rsaquo;Object Listing</div> {% endblock %}
 {% block pretitle %} <h2>Object Listing for {{date}} (UT{{ tz_offset }})<br>
@@ -43,32 +67,36 @@
    {% else %}
       <p> No objects in database</p>
    {% endif %}
+   {{ embed_image|safe }}
 </div>
 <div id="content-related" style="margin-right: -25em;">
-   {# filters #}
    <div class="module" id="tinfo">
-      <h2>Telescope Position</h2>
-      <table border=0>
-         <tr>
-            <td>RA:</td><td> {{ tel_RA }} </td>
-         </tr>
-         <tr>
-            <td>DEC:</td><td> {{ tel_DEC }} </td>
-         </tr>
-         <tr>
-            <td>HA:</td><td> {{ tel_ha }} </td>
-         </tr>
-         <tr>
-            <td>Alt:</td><td> {{ tel_alt }}&deg; </td>
-         </tr>
-         <tr>
-            <td>Az:</td><td> {{ tel_az }}&deg;</td>
-         </tr>
-      </table>
-      <br>
-      <form action="" method="POST">{% csrf_token %}
-         <input type=submit name='action' value='Park'>
-      </form>
+      <h2>Telescope Position
+         <button style="float: right;" onclick="hide_section(this)">_</button>
+      </h2>
+      <div id=body style="display: {{ module_display.tinfo }};">
+         <table border=0>
+            <tr>
+               <td>RA:</td><td> {{ tel_RA }} </td>
+            </tr>
+            <tr>
+               <td>DEC:</td><td> {{ tel_DEC }} </td>
+            </tr>
+            <tr>
+               <td>HA:</td><td> {{ tel_ha }} </td>
+            </tr>
+            <tr>
+               <td>Alt:</td><td> {{ tel_alt }}&deg; </td>
+            </tr>
+            <tr>
+               <td>Az:</td><td> {{ tel_az }}&deg;</td>
+            </tr>
+         </table>
+         <br>
+         <form action="" method="POST">{% csrf_token %}
+            <input type=submit name='action' value='Park'>
+         </form>
+      </div>
    </div>
 
    <form action="" method="post">{% csrf_token %}

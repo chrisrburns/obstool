@@ -1,16 +1,12 @@
-from django.shortcuts import render
-import sys,os,subprocess
 from django.template import Context, loader, RequestContext
-from django.shortcuts import render_to_response
 from navigator.models import Object,genMWO
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_protect
 from django import forms
-from django.core.context_processors import csrf
 from obstool import settings
 import datetime
-import string
-import time
 #import plot_ams_phases,plot_ams_HA
+import plot_skyview
 import StringIO
 import Image, ImageDraw
 from numpy import argsort,mean
@@ -116,6 +112,9 @@ def index(request):
 
    # Now deal with telescope position
    tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
+   # Also see if window is to be displayed:
+   module_display = request.session.get('module_display', {});
+   print "module_display=",module_display
 
    obs = genMWO(date)
    sid_time = str(obs.sidereal_time())
@@ -148,12 +147,15 @@ def index(request):
    else:
       stz_offset = ""
 
+   print module_display
+   embed_image = plot_skyview.plot_sky_map(obj_list, date=date)
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
-      'tel_az':tel_az,'sid_time':sid_time,
+      'tel_az':tel_az,'sid_time':sid_time,'embed_image':embed_image,
+      'module_display':module_display,
       })
    return HttpResponse(t.render(c))
 
@@ -263,6 +265,24 @@ def palette(low, high, reverse=None):
       pal.extend((intens,)*3)
    return pal
 
+@csrf_protect
+def update_session(request):
+   #message = request.GET.get('message', 'nothing')
+   if 'var' not in request.POST:
+      return HttpResponse('ok')
+   var = request.POST['var']
+   print 'var = ',var
+   if 'key' in request.POST and 'val' in request.POST:
+      if var not in request.session:
+         request.session[var] = {}
+      key = request.POST['key']
+      value = request.POST['val']
+      request.session[var][key] = value
+   elif 'val' in request.POST:
+      value = request.POST['val']
+      request.session[var] = value
+   request.session.modified = True
+   return HttpResponse('ok')
 
 def finder(request, objectid):
    obj = Object.objects.get(id=objectid)
