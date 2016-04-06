@@ -37,6 +37,8 @@
     <form action="" method="post">{% csrf_token %}
        {% if tel_status == "SLEW" %}
        <font color='red'>{{ az_move }}</font><br>
+       <font color='red'>{{ ra_move }}</font><br>
+       <font color='red'>{{ dec_move }}</font><br>
           <input type='submit' name='action' value='Sync'>
           <input type='submit' name='action' value='Cancel'>
        {% else %}

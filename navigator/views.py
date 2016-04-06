@@ -77,6 +77,7 @@ def index(request):
    #Default:  nothing posted and no session info
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
+   show_types = None
    form = FilterForm()
 
    if request.method == "POST":
@@ -98,6 +99,7 @@ def index(request):
    if form.is_valid():
       only_visible = form.cleaned_data.get('only_visible',None)
       ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
+      show_types = form.cleaned_data.get('show_types', None)
       rating_low = form.cleaned_data.get('rating_low',None)
       epoch = form.cleaned_data.get('epoch',None)
       tz_offset =form.cleaned_data.get('tz_offset', 0)
@@ -134,6 +136,8 @@ def index(request):
          continue
       if rating_low is not None and obj.rating < rating_low:
          continue
+      if show_types is not None and obj.type not in show_types:
+         continue
       new_list.append(obj)
    obj_list = new_list
 
@@ -148,7 +152,8 @@ def index(request):
       stz_offset = ""
 
    print module_display
-   embed_image = plot_skyview.plot_sky_map(obj_list, date=date)
+   embed_image = plot_skyview.plot_sky_map(obj_list, date=date, 
+         tel_az=tel_az, tel_alt=tel_alt)
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {
       'object_list': obj_list, 'form':form, 'date':sdate,
@@ -214,17 +219,38 @@ def detail(request, object_id):
    if tel_status == "SLEW":
       tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(prev_tel_obj, date)
       new_RA,new_DEC,new_ha,new_alt,new_az = telescope_position(cur_tel_obj, date)
+      # Now we move the dome
       delta_az = float(new_az) - float(tel_az)
       if delta_az < -180:
          delta_az += 360
       elif delta_az > 180:
          delta_az -= 360
       if delta_az > 0:
-         az_move = "Dome East %.2f" % (delta_az)
+         az_move = "Dome Right %.2f" % (delta_az)
       else:
-         az_move = "Dome West %.2f" % (-delta_az)
+         az_move = "Dome Left %.2f" % (-delta_az)
+
+      # Now we move in RA
+      delta_ra = (ephem.hours(new_RA) - ephem.hours(tel_RA))/pi*12.
+      if delta_ra < 0:
+         ra_move = "Slew West %.2f h" % (abs(delta_ra))
+      else:
+         ra_move = "Slew East %.2f h" % (abs(delta_ra))
+
+      # Now we move in DEC
+      delta_dec = (ephem.degrees(new_DEC) - ephem.degrees(tel_DEC))/pi*180
+      if delta_dec < -180:  delta_dec += 180
+      if delta_dec > 180: delta_dec -= 180
+      if delta_dec < 0:
+         dec_move = "Slew South %.2f" % (abs(delta_dec))
+      else:
+         dec_move = "Slew North %.2f" % (abs(delta_dec))
+
+
    else:
       az_move = None
+      ra_move = None
+      dec_move = None
       tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
    
    c = RequestContext(request, {
@@ -234,7 +260,8 @@ def detail(request, object_id):
       'eyepieces':settings.fovs,'cur_eyepiece':eyepiece,
       'message':message, 'error':error, 'epoch':epoch,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
-      'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move
+      'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move,
+      'ra_move':ra_move, 'dec_move':dec_move
       })
    return HttpResponse(t.render(c))
 
