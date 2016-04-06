@@ -397,6 +397,7 @@ input[type=text], input[type=password], textarea, select, .vTextField {
     background-position: top;
 }
 
+
 /* MODULES */
 
 .module {
@@ -763,5 +764,9 @@ table#change-history tbody th {
 #content-related .module h2 {
     background: #eee url(../imgs/nav-bg.gif) bottom left repeat-x;
     color: #666;
+}
+
+#content-related .module button {
+   padding: 0 3px 0 3px;
 }
 

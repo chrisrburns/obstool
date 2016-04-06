@@ -186,6 +186,7 @@ class Object(models.Model):
          star = self.genobj()
          star.compute(MWO)
          return '%.2f' % (star.mag)
+      return self.Mv
 
    def srating(self):
       '''Returns an HTML star rating.'''
