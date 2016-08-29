@@ -2,11 +2,10 @@
 
 #import os
 #os.environ['HOME'] = '/Library/WebServer/mpl_home'
-import sys
 import matplotlib
-import matplotlib.cbook
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
+from matplotlib.figure import SubplotParams
 #from matplotlib import pyplot as plt
 from numpy import *
 import matplotlib.dates as mdates
@@ -17,150 +16,95 @@ try:
    import ephem3 as ephem
 except:
    import ephem
-import HJD
+from models import genMWO
 
 colors = {'c':'blue','ab':'red'}
 
-def columns(filename, skip=[], delim=None):
-   f = open(filename,'r')
-   if not f:
-      raise IOError, 'Could not find file %s' % (filename)
-
-   lines = f.readlines()
-   data = []
-   i = 0
-   for line in lines:
-      line = string.strip(line)
-      if line == "":  continue
-      if line[0] != "#" and i not in skip:  data.append(line)
-      i = i + 1
-
-   if delim is None:
-      line = data[0]
-      if len(string.split(line)) > 1:
-         sep = None
-      elif len(string.split(line,',')) > 1:
-         sep = ","
-      elif len(string.split(line,';')) > 1:
-         sep = ";"
-      else:
-         sep = None
-   else:
-      sep = delim
-
-   data = map(lambda str,s=sep: string.split(str, s), data)
-
-   #check for consistency:
-   M = len(data)
-   N = len(data[0])
-   for line in data:
-      if len(line) != N:
-         raise IndexError, "data has missing cells"
-
-   # now do a transpose
-   datat = []
-   for i in range(N):
-      datat.append([])
-      for j in range(M):
-         datat[-1].append(data[j][i])
-
-   # Now try to convert to floats and numarrays
-   for i in range(len(datat)):
-      try:
-         datat[i] = map(float, datat[i])
-         datat[i] = Numeric.array(datat[i])
-      except:
-         # silently ignore non-numeric types.
-         datat[i] = map(None, datat[i])
-
-   return datat
-
-
-def plot_ams_map(RRLs, date=None, target_phase=0.45, target_phase_c=0.45, p_lim=0.02, 
-      max_am=2.0, new_window=False):
-   '''Plots the airmass for a given night for the given objects (expected to
+def plot_alt_map(objs, date=None, toff=0, new_window=False):
+   '''Plots the altitude for a given night for the given objects (expected to
    be of type Objects).  Returns two strings:  the first is the binary
    PNG file that is the graph, the second is the <map> HTML that will be used
    to make the points in the graph "hot spots"'''
-   sun = ephem.Sun()
-   lco = HJD.lco_gen()
    if date is None:
       date = ephem.now()
-   else:
-      date = ephem.Date(date)
-   lco.date = date
-   sun.compute(lco)
+   toff = toff/24.
+   sun = ephem.Sun()
+   MWO = genMWO(date=date)
+   sun.compute(MWO)
 
    # Figure out the start and stop time for the night.
-   t0 = lco.next_setting(sun)    # In DJD
-   t1 = lco.next_rising(sun)
-   if t1 < t0:
-      t0 = lco.previous_setting(sun)
-   lco.date = t0
+   sunset = MWO.next_setting(sun)    # In DJD
+   sunrise = MWO.next_rising(sun)
+   if sunset > sunrise:
+      sunset = MWO.previous_setting(sun)
+   #MWO.date = sunset
 
    # Setup the graph
-   fig = Figure()
+   fig = Figure(subplotpars=SubplotParams(left=0.07, right=0.99))
    canvas = FigureCanvasAgg(fig)
    ax = fig.add_subplot(111)
    ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
    ax.xaxis.set_minor_locator(mdates.MinuteLocator(byminute=[0,60]))
    ax.set_xlabel('UTC time')
-   ax.set_ylabel('Airmass')
+   ax.set_ylabel('Altitude')
    ax.grid(True, which='both', linestyle='-', color='gray')
-   t = t0.datetime()
-   #ax.set_title('Night of %d/%d %s %d' % (t.day, t.day+1, t.strftime('%b'), t.year))
    lines = []
    names = []
    ids = []
+
+   for obj in objs:
+      eobj = obj.genobj()
+      print obj.name
+      t0 = obj.rise_time()
+      if t0 is None or t0 < sunset: t0 = sunset
+      if t0 > sunrise: continue
+      t1 = obj.set_time()
+      if t1 is None or t1 > sunrise: t1 = sunrise
+
+      tt = date
+      if tt < t0:  tt = t0
+      if tt > t1:  tt = t1
+      tt = tt*1 + 693595.5
+      saved_epoch = obj.epoch
+      obj.epoch = date
+      aa = obj.altitude()
+      ts = arange(t0,t1+ephem.minute,10*ephem.minute)
+      alts = []
+      for t in ts:
+         #obj.epoch = t
+         #alts.append(obj.altitude())
+         MWO.date = t
+         eobj.compute(MWO)
+         alts.append(eobj.alt*180.0/pi)
+      alts = array(alts)
+      mid = argmax(alts)
+      merid = ephem.Date(ts[mid]+toff)
+      maxalt = alts[mid]
+      ts = ts + 693595.5   # convert to matplotlib epochs
+      title = "Meridian @ %s (%.1fd)" % (str(merid).split()[1], maxalt)
+      ax.text(0.5, 1.1, title, transform=ax.transAxes, ha='center', 
+            va='top', fontsize=18)
+      ax.plot_date(ts+toff, alts, '-')
+      pobj = ax.plot_date([tt+toff],[aa], 'o', mfc='k')
+      lines.append(pobj[0])
+      names.append(obj.name)
+      ids.append(obj.pk)
+      obj.epoch = saved_epoch
    
-   for RRL in RRLs:
-      if RRL.type == "ab":
-         tp = target_phase
-      else:
-         tp = target_phase_c
-      RRL.epoch = t0
-      phase0 = float(RRL.phase())
-      next = t0
-      if phase0 < tp:
-         next += (tp - phase0)*RRL.period
-      else:
-         next += (1 + tp - phase0)*RRL.period
-      while next < t1:
-         # while the sun hasn't risen:
-         RRL.epoch = next
-         am = float(RRL.airmass())
-         if 0 < am < max_am:
-            md = mdates.date2num(ephem.Date(next).datetime())
-            obj = ax.plot_date([md], [am], 'o', mfc=colors[RRL.type])
-            lines.append(obj[0])
-            names.append(RRL.name)
-            ids.append(RRL.pk)
-            if p_lim > 0:
-               xs = arange(next - p_lim*RRL.period,
-                           next + p_lim*RRL.period + ephem.minute,
-                           ephem.minute)
-               ys = []
-               for x in xs:
-                  RRL.epoch = x
-                  ys.append(float(RRL.airmass()))
-               ys = array(ys)
-               gids = greater_equal(xs, next-p_lim*RRL.period)*\
-                     less_equal(xs, next+p_lim*RRL.period)
-               line = ax.plot_date(xs[gids]-next+md, ys[gids], '-', color=colors[RRL.type])
-               #gids = greater_equal(xs, next-p_lim[1]*RRL.period)*\
-               #      less_equal(xs, next+p_lim[1]*RRL.period)
-               #line = ax.plot_date(xs[gids]-next+md, ys[gids], '--', color=colors[RRL.type])
-         next += RRL.period
-   
-   ax.set_ylim(max_am, 0.8)
+   ax.set_ylim(0, 90.)
+
+   ax.set_xlim(sunset*1+693595.5+toff, sunrise*1+693595.5+toff)
    ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+   print len(ax.xaxis.get_major_ticks())
    for tick in ax.xaxis.get_major_ticks():
       tick.label2On = True
+   ax.axvline(date*1+693595.5+toff, color='red')
+   ax.fill_between([sunset*1+693595.5+toff,sunrise*1+1+693595.5+toff], 0, 30,
+         color='0.7', zorder=0)
 
-   # Now we save to a string and also convert to a PIL image, so we can get the size.
+   # Now we save to a string and also convert to a PIL image, so we can get 
+   #  the size.
    output = StringIO.StringIO()
-   #plt.draw()
-   #fig.savefig(output, format='png')
    canvas.print_figure(output)
    img_str = 'data:image/png,' + urllib.quote(output.getvalue())
    output.seek(0)
@@ -173,7 +117,7 @@ def plot_ams_map(RRLs, date=None, target_phase=0.45, target_phase_c=0.45, p_lim=
          for o in lines]
    coords = [(b.x0, 1-b.y1, b.x1, 1-b.y0) for b in bboxes]
    
-   HTML = "<img src=\"%s\" usemap=\"#map\" >" % img_str
+   HTML = "<img src=\"%s\" style=\"width: 280px\" usemap=\"#map\" >" % img_str
    HTML += "<map name=\"map\">\n"
    for i in range(len(names)):
       HTML += "<area shape=rect coords=\"%d %d %d %d\" title=\"%s\" href=\"../object/%d/\"" \

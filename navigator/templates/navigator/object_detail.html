@@ -70,9 +70,10 @@
       </div>
     {% endif %}
   </div>
-  <div style="padding: 10px 0px 0px 0px; width:260px; float:left;">
+  <div style="padding: 10px 0px 0px 0px; width:300px; float:left;">
+     {{ embed_plot | safe }}
      <a href="finder">
-        <img src="finder{{extras}}" width=250>
+        <img style="padding: 0px 0px 0px 20px;" src="finder{{extras}}" width=250>
      </a>
      <br><font size=-2>{{ finder_size }}X{{ finder_size }} 
         arc-minutes.<br>Orientation: {{ finder_orientation }}</font>
