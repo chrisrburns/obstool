@@ -89,7 +89,7 @@ function draw_dome (fdiameter, fheight, alt, az) {
    telescope.rotate(-alt, center);
 
    var newLayer = new Layer();
-   var center2 = new Point(view.center.x, view.center.x + 1.5*rad);
+   var center2 = new Point(view.center.x, view.center.x + 1.8*rad);
    var dome2 = new Path.Circle({
       center: center2,
       radius: rad,
