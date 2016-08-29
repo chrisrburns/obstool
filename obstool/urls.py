@@ -19,6 +19,8 @@ from django.views.generic.base import TemplateView
 from settings import MEDIA_ROOT,SITE_ROOT
 
 urlpatterns = [
+    url(r'^$', TemplateView.as_view(template_name='main.html')),
+    url(r'^index.html$', TemplateView.as_view(template_name='main.html')),
     url(r'^navigator/', include('navigator.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^media/(?P<path>.*)$', 'django.views.static.serve',
