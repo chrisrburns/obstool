@@ -141,6 +141,30 @@ class Object(models.Model):
       star.compute(MWO)
       return star.alt*180.0/pi
 
+   def rise_time(self):
+      '''Compute the rising time of the object.'''
+      MWO = genMWO(self.epoch)
+      star = self.genobj()
+      star.compute(MWO)
+      if star.circumpolar or star.neverup: return None
+
+      # If the object is up, we want the previous rise time
+      if star.alt > 0:
+         return MWO.previous_rising(star)
+      else:
+         return MWO.next_rising(star)
+
+   def set_time(self):
+      '''Compute the setting time of the object.'''
+      MWO = genMWO(self.epoch)
+      star = self.genobj()
+      star.compute(MWO)
+      if star.circumpolar or star.neverup: return None
+
+      # regardless of whether it's up or not, we want next setting
+      return MWO.next_setting(star)
+
+
    def azimuth(self):
       '''Compute the altitude of the object in degrees'''
       if self.objtype == 'PARK':
