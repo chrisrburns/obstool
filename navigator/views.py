@@ -1,4 +1,5 @@
 from django.template import Context, loader, RequestContext
+from django.db import models
 from navigator.models import Object,genMWO
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
@@ -6,7 +7,8 @@ from django import forms
 from obstool import settings
 import datetime
 #import plot_ams_phases,plot_ams_HA
-import plot_skyview
+import plot_skyview_proj as plot_skyview
+import plot_objs
 import StringIO
 import Image, ImageDraw
 from numpy import argsort,mean
@@ -171,6 +173,10 @@ def detail(request, object_id):
    extras = "?"
    epoch = None
    tz_offset = 0
+   if 'object_list_form' in request.session:
+      tz_offset = float(request.session['object_list_form']['tz_offset'])
+      if tz_offset is None:
+         tz_offset = 0
 
    date = get_current_time(request)
    obj.epoch = date
@@ -252,7 +258,7 @@ def detail(request, object_id):
       ra_move = None
       dec_move = None
       tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
-   
+   embed_plot = plot_objs.plot_alt_map([obj], date=date, toff=tz_offset) 
    c = RequestContext(request, {
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
@@ -261,13 +267,16 @@ def detail(request, object_id):
       'message':message, 'error':error, 'epoch':epoch,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move,
-      'ra_move':ra_move, 'dec_move':dec_move
+      'ra_move':ra_move, 'dec_move':dec_move, 'embed_plot':embed_plot,
       })
    return HttpResponse(t.render(c))
 
 def search_name(request, object_name):
    error = None
-   objs = Object.objects.filter(name__contains=object_name)
+   #objs = Object.objects.filter(name__contains=object_name)
+   objs = Object.objects.filter(models.Q(name__icontains=object_name) |\
+                                models.Q(descr__icontains=object_name) |
+                                models.Q(objtype__icontains=object_name))
    if len(objs) == 0:
       error = "No object matching your query was found"
       message = None
@@ -296,6 +305,7 @@ def palette(low, high, reverse=None):
 def update_session(request):
    #message = request.GET.get('message', 'nothing')
    if 'var' not in request.POST:
+      print 'var not found'
       return HttpResponse('ok')
    var = request.POST['var']
    print 'var = ',var

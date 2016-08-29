@@ -26,6 +26,12 @@
          }
       }
    }
+   function mysearch(obj) {
+         var search_string = document.getElementById('SearchText').value;
+         if (search_string != 'Search...') {
+            window.location = "./search/"+search_string;
+         }
+   }
 </script>
 {% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="../index.html">Home</a> &rsaquo;Object Listing</div> {% endblock %}
@@ -36,15 +42,20 @@
    {% if object_list %}
       <!-- Showing {{ object_list|length }} objects<br>
       <font size=-3 color="grey">Click on table headers to sort</font> -->
+      <input value="Search..." id="SearchText" style="color:GrayText" 
+             onchange="SearchText" 
+             onfocus="javascript:this.value=''" 
+             onblur="javascript: if(this.value==''){this.value='Search...';}" />
+             <input id="searchbutton" type="button"  value="Search" 
+                    class="button" onclick="mysearch(this)" />
       <table class='sortable' cellspacing="0" border=1 id="result_list">
          <thead>
             <tr>
                <th>Rating</th>
                <th>Name</th>
                <th>HA</th>
-               <th>&Delta;Az</th>
+               <th>alt</th>
                <th>Set</th>
-               <th>size/sep</th>
                <th>Type</th>
                <th>Description</th>
             </tr>
@@ -55,9 +66,8 @@
                <td>{{ obj.srating|safe }}{% if obj.dark %}&nbsp;D{% endif %}</td>
                <th><a href="{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
                <td>{{ obj.hour_angle|format:"%.1f" }}</td>
-               <td>{{ obj.dazimuth }} </td>
+               <td>{{ obj.altitude|format:"%.1f" }}</td>
                <td>{{ obj.settime }} </td>
-               <td>{{ obj.ssize }}</td>
                <td>{{ obj.objtype }}</td>
                <td>{{ obj.descr }} </td>
             </tr>

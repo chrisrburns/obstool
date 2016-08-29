@@ -3,19 +3,19 @@
 {% block style %}
 <script src="/media/js/sorttable.js"></script>
 {% endblock %}
-{% block breadcrumbs %}<div class="breadcrumbs"><a href="..">Home</a> &rsaquo;Search Results</div> {% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="/index.html">Home</a> &rsaquo;<a href="/navigator/">Object Listing</a> &rsaquo; Search Results</div> {% endblock %}
 {% block pretitle %} <h2>Search Results</h2> {% endblock %}
 {% block content %}
 <div id="content-main">
    {% if message %}
       <div style="background: #eeffcc;"> 
-         <img src="/media/img/admin/icon_success.gif"> 
+         <img src="/media/imgs/icon_success.gif"> 
          &nbsp;&nbsp;{{ message }} 
       </div>
    {% endif %}
    {% if error %}
       <div style="background: red; color: white;">
-         <img src="/media/img/admin/icon_alert.gif"> 
+         <img src="/media/imgs/icon_alert.gif"> 
          &nbsp;&nbsp; {{ error }} 
       </div>
    {% endif %}
@@ -30,20 +30,18 @@
                <th>RA</th>
                <th>DEC</th>
                <th>Vmag</th>
-               <th>Pr.</th>
-               <th>Nobs</th>
+               <th>Description</th>
             </tr>
          </thead>
          <tbody>
             {% for obj in objects %}
             <tr class="{% cycle 'row1' 'row2' %}">
-               <th><a href="../object/{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
-               <td>{{ obj.type }}</td>
-               <td>{{ obj.ra|angle2hms }}</td>
-               <td>{{ obj.dec|angle2dms }}</td>
-               <td>{{ obj.Vmag }} </td>
-               <td>{{ obj.priority }} </td>
-               <td>{{ obj.Nobs }} </td>
+               <th><a href="../{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
+               <td>{{ obj.objtype }}</td>
+               <td>{{ obj.RA|angle2hms }}</td>
+               <td>{{ obj.DEC|angle2dms }}</td>
+               <td>{{ obj.sMv }} </td>
+               <td>{{ obj.descr }} </td>
             </tr>
             {% endfor %}
          </tbody>
