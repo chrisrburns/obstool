@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
      url(r'^$', views.index, name='index'),
+     url(r'^skymap$', views.mapview),
      url(r'^search/(?P<object_name>.+)$', views.search_name),
      url(r'update_session', views.update_session),
      url(r'^(?P<object_id>\d+)/$', views.detail, name='detail'),

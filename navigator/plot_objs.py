@@ -52,13 +52,16 @@ def plot_alt_map(objs, date=None, toff=0, new_window=False):
    names = []
    ids = []
 
+   sunset = sunset - 60*ephem.minute
+   sunrise = sunrise + 60*ephem.minute
+
    for obj in objs:
       eobj = obj.genobj()
-      print obj.name
       t0 = obj.rise_time()
       if t0 is None or t0 < sunset: t0 = sunset
       if t0 > sunrise: continue
       t1 = obj.set_time()
+      if t1 < sunset: continue
       if t1 is None or t1 > sunrise: t1 = sunrise
 
       tt = date
@@ -95,10 +98,13 @@ def plot_alt_map(objs, date=None, toff=0, new_window=False):
 
    ax.set_xlim(sunset*1+693595.5+toff, sunrise*1+693595.5+toff)
    ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
-   print len(ax.xaxis.get_major_ticks())
    for tick in ax.xaxis.get_major_ticks():
       tick.label2On = True
    ax.axvline(date*1+693595.5+toff, color='red')
+   ax.axvline(sunset+60*ephem.minute+693595.5+toff, linestyle='--',
+         linewidth=2, color='red')
+   ax.axvline(sunrise-60*ephem.minute+693595.5+toff, linestyle='--',
+         linewidth=2, color='red')
    ax.fill_between([sunset*1+693595.5+toff,sunrise*1+1+693595.5+toff], 0, 30,
          color='0.7', zorder=0)
 

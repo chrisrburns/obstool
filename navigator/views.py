@@ -83,11 +83,11 @@ def index(request):
    form = FilterForm()
 
    if request.method == "POST":
-      if request.POST['action'] == 'Update':
+      if request.POST.get('action','') == 'Update':
          form = FilterForm(request.POST)
          # save this form info into the session cache
          request.session['object_list_form'] = request.POST.copy()
-      elif request.POST['action'] == 'Park':
+      elif request.POST.get('action','') == 'Park':
          request.session['cur_tel_obj'] = 'Park'
          cur_tel_obj = 'Park'
       else:
@@ -153,12 +153,106 @@ def index(request):
    else:
       stz_offset = ""
 
-   print module_display
    embed_image = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt)
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {
       'object_list': obj_list, 'form':form, 'date':sdate,
+      'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
+      'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
+      'tel_az':tel_az,'sid_time':sid_time,'embed_image':embed_image,
+      'module_display':module_display,
+      })
+   return HttpResponse(t.render(c))
+
+def mapview(request):
+   only_visible = None
+   ha_high = settings.HA_SOFT_LIMIT
+   epoch = None
+   rating_low = None
+   new_window = False
+   tz_offset = 0
+   #Default:  nothing posted and no session info
+   cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
+   prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
+   show_types = None
+   form = FilterForm()
+
+   if request.method == "POST":
+      if request.POST.get('action','') == 'Update':
+         form = FilterForm(request.POST)
+         # save this form info into the session cache
+         request.session['object_list_form'] = request.POST.copy()
+      elif request.POST.get('action','') == 'Park':
+         request.session['cur_tel_obj'] = 'Park'
+         cur_tel_obj = 'Park'
+      else:
+         # The reset button was called
+         form = FilterForm()
+         if 'object_list_form' in request.session:
+            del request.session['object_list_form']
+   if 'object_list_form' in request.session:
+      form = FilterForm(request.session['object_list_form'])
+
+   if form.is_valid():
+      only_visible = form.cleaned_data.get('only_visible',None)
+      ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
+      show_types = form.cleaned_data.get('show_types', None)
+      rating_low = form.cleaned_data.get('rating_low',None)
+      epoch = form.cleaned_data.get('epoch',None)
+      tz_offset =form.cleaned_data.get('tz_offset', 0)
+      new_window = form.cleaned_data.get('new_window',False)
+
+   if tz_offset is None:
+      tz_offset = 0
+   if epoch:  
+      date = ephem.Date(epoch) - tz_offset*ephem.hour
+   else:
+      date = ephem.now()
+
+   # Now deal with telescope position
+   tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
+   # Also see if window is to be displayed:
+   module_display = request.session.get('module_display', {});
+
+   obs = genMWO(date)
+   sid_time = str(obs.sidereal_time())
+   obj_list = Object.objects.all()
+   for obj in obj_list:
+      obj.epoch = date
+      obj.tel_az = float(tel_az)
+   obj_list = sorted(obj_list, key=lambda a: float(a.PrecRAh()))
+
+   new_list = []
+   for obj in obj_list:  
+      #obj.epoch = date
+      if only_visible is not None and only_visible and not obj.visible():
+         continue
+      if ha_high is not None and \
+         abs(obj.hour_angle()) > ha_high:
+         continue
+      if rating_low is not None and obj.rating < rating_low:
+         continue
+      if show_types is not None and obj.type not in show_types:
+         continue
+      new_list.append(obj)
+   obj_list = new_list
+
+   if epoch:
+      sdate = epoch.strftime('%m/%d/%y %H:%M:%S')
+   else:
+      sdate = ephem.Date(ephem.now()+tz_offset*ephem.hour)
+      sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
+   if tz_offset != 0:
+      stz_offset = "%.1f" % (tz_offset)
+   else:
+      stz_offset = ""
+
+   embed_image = plot_skyview.plot_sky_map(obj_list, date=date, 
+         tel_az=tel_az, tel_alt=tel_alt, imsize=7)
+   t = loader.get_template('navigator/object_map.html')
+   c = RequestContext(request, {
+      'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'embed_image':embed_image,
@@ -365,9 +459,14 @@ def finder(request, objectid):
    outstr = StringIO.StringIO()
    img = Image.open(obj.finder)
    if size and int(size) < settings.FINDER_BASE_SIZE:
+      print size
       size = int(size)
+      print size
       scale = 1.0*settings.FINDER_BASE_SIZE/img.size[0]    # arc-min per pixel
+      print scale
       new_size = int(size/scale)  # New size in pixels
+      print new_size
+      print img.size[0], img.size[1]
       img = img.crop((int(img.size[0]-new_size)/2,
                      int(img.size[1]-new_size)/2,
                      int(img.size[0]+new_size)/2,

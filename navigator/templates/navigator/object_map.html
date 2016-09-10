@@ -1,0 +1,116 @@
+{% extends "base_site.html" %}
+      Allow from all
+{% load myfilters %}
+{% block style %}
+<script src="/media/js/sorttable.js"></script>
+<script type="text/javascript">
+   function hide_section(element) {
+      xhttp = new XMLHttpRequest();
+      id = element.parentNode.parentNode.id;
+      els = element.parentNode.parentNode.children;
+      getstr = "update_session";
+      sendstr = "csrfmiddlewaretoken={{ csrf_token }}&var=module_display&key="+id+"&val=";
+      for (var i = 0 ; i < els.length ; i++) {
+         if (els[i].tagName != "H2") {
+            if (els[i].style.display == 'none') {
+               xhttp.open("POST", getstr, true);
+               xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+               xhttp.send(sendstr+"inline");
+               els[i].style.display = "inline";
+            } else {
+               els[i].style.display = "none";
+               xhttp.open("POST", getstr, true);
+               xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+               xhttp.send(sendstr+"none");
+            }
+         }
+      }
+   }
+   function mysearch(obj) {
+         var search_string = document.getElementById('SearchText').value;
+         if (search_string != 'Search...') {
+            window.location = "./search/"+search_string;
+         }
+   }
+</script>
+{% endblock %}
+{% block breadcrumbs %}<div class="breadcrumbs"><a href="../index.html">Home</a> &rsaquo;Object Map</div> {% endblock %}
+{% block pretitle %} <h2>Object Map for {{date}} (UT{{ tz_offset }})
+   Sideral time: {{ sid_time }}</h2> {% endblock %}
+{% block content %}
+<div id="content-main">
+   {{ embed_image|safe }}
+</div>
+<div id="content-related" style="margin-right: -25em;">
+   <div class="module" id="tinfo">
+      <h2>Telescope Position
+         <button style="float: right;" onclick="hide_section(this)">_</button>
+      </h2>
+      <div id=body style="display: {{ module_display.tinfo }};">
+         <table border=0>
+            <tr>
+               <td>RA:</td><td> {{ tel_RA }} </td>
+            </tr>
+            <tr>
+               <td>DEC:</td><td> {{ tel_DEC }} </td>
+            </tr>
+            <tr>
+               <td>HA:</td><td> {{ tel_ha }} </td>
+            </tr>
+            <tr>
+               <td>Alt:</td><td> {{ tel_alt }}&deg; </td>
+            </tr>
+            <tr>
+               <td>Az:</td><td> {{ tel_az }}&deg;</td>
+            </tr>
+         </table>
+         <br>
+         <form action="" method="POST">{% csrf_token %}
+            <input type=submit name='action' value='Park'>
+         </form>
+      </div>
+   </div>
+
+   <form action="" method="post">{% csrf_token %}
+     <div class="module" id="settings">
+        <h2>Settings
+           <button style="float: right;" onclick="hide_section(this)">_</button>
+        </h2>
+        <div id=body style="display: {{ module_display.settings }};">
+            Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
+            <div style="text-align: center;">
+               <font size=-2>(yyyy-mm-dd hh:mm:ss)<br>Blank = now </font>
+            </div><br>
+            UTC offset: {{ form.tz_offset.errors }} {{ form.tz_offset }}<br>
+            <div style="text-align: center;">
+               <font size=-2>PDT = -7<br>
+                             PST = -8</font>
+            </div><br>
+            {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
+  
+           <input type="submit" name='action' value="Update">
+           <input type="submit" name='action' value="Reset">
+        </div>
+     </div>
+     <div class="module" id="filters">
+        <h2>Filters
+           <button style="float: right;" onclick="hide_section(this)">_</button>
+        </h2>
+        <div id=body style="display: {{ module_display.filters }};">
+           Rating &ge;
+           {{ form.non_field_errors }}
+           {{ form.rating_low.errors }} {{ form.rating_low}}
+           <br>
+           |HA| &le; {{ form.ha_high.errors }} {{ form.ha_high}}
+           <br>
+           {{ form.only_visible.errors }}
+           <label for="id_only_visible">Only visible:</label> {{ form.only_visible }}
+           <br>
+           <input type="submit" name='action' value="Update">
+           <input type="submit" name='action' value="Reset">
+       </div>
+     </div>
+   </form>
+   <br>
+</div>
+{% endblock %}

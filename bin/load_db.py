@@ -9,7 +9,6 @@ if 'OBSTOOL_DIR' not in os.environ:
    sys.exit(1)
 sys.path.insert(0, os.environ['OBSTOOL_DIR'])
 sys.path.insert(0, os.path.dirname(os.environ['OBSTOOL_DIR']))
-print sys.path
 import settings
 from navigator.models import Object
 from django.core.files.base import ContentFile
