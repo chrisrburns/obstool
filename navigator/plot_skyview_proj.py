@@ -2,7 +2,7 @@
 
 import matplotlib
 from matplotlib.backends.backend_agg import FigureCanvasAgg
-from matplotlib.figure import Figure
+from matplotlib.figure import Figure,SubplotParams
 from matplotlib.patches import Circle
 from numpy import *
 from models import genMWO
@@ -43,15 +43,16 @@ def RAhDecd2xy(RA,DEC,obs):
    o._dec = ephem.degrees(DEC*pi/180)
    o._epoch = ephem.J2000
    o.compute(obs)
-   if o.alt*180.0/pi < 30: return (None,None)
+   clip=False 
+   if o.alt*180.0/pi < 30: clip=True
    x = (pi/2-o.alt)*180/pi*sin(o.az)
    y = (pi/2-o.alt)*180/pi*cos(o.az)
-   return (x,y)
+   return (x,y,clip)
 
 
 
 def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
-      tel_alt=90, tel_az=45):
+      tel_alt=90, tel_az=45, imsize=5):
    '''Plots the objects for a given night for the given objects (expected to
    be of type Objects).  Returns two strings:  the first is the binary
    PNG file that is the graph, the second is the <map> HTML that will be used
@@ -64,7 +65,8 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    MWO = genMWO(date)
 
    # Setup the graph
-   fig = Figure((6,6), frameon=False)
+   fig = Figure((imsize,imsize), frameon=False, 
+         subplotpars=SubplotParams(left=0.00,right=1.0, bottom=0.0, top=1.))
    canvas = FigureCanvasAgg(fig)
    ax = fig.add_subplot(111)
    lines = []
@@ -98,25 +100,28 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
       ax.plot([rho*cos(theta), rho*cos(theta+pi)],
               [rho*sin(theta),rho*sin(theta+pi)], '-', color='0.5', zorder=0)
 
+   clipper=c
    ax.axis('off')
+   ax.set_xlim(-100,100)
+   ax.set_ylim(-100,100)
 
    # Try some constellations
    for cons in d:
       ras,decs = d[cons]
       xs,ys = [],[]
-      draw = True
+      draw = False
       for i in range(len(ras)):
          if ras[i] is not None:
-            x,y = RAhDecd2xy(ras[i],decs[i],MWO)
-            if x is None:
-               # constellation not visible
-               draw = False
-               break
+            x,y,clip = RAhDecd2xy(ras[i],decs[i],MWO)
+            if not clip:
+               # at least part of constellation is visible
+               draw = True
          else:
             x,y = None,None
          xs.append(x); ys.append(y)
       if draw:
-         ax.plot(xs,ys, '-', color='0.8', zorder=0)
+         ax.plot(xs,ys, '-', color='0.8', zorder=0, clip_path=clipper)
+
 
    # Now we save to a string and also convert to a PIL image, so we can get 
    #  the size.
