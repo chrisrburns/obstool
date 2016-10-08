@@ -55,6 +55,13 @@
        <tr><td>Distance: </td><td> {{ object.sdistance }} </td></tr>
        <tr><td>Dark Sky?: </td><td> {% if obj.dark %}D{% endif %} </td></tr>
        <tr><td>Rating: </td><td> {{ object.srating|safe }} </td></tr>
+       <tr><td colspan=2>
+          <form action="" method="post">{% csrf_token %}
+             Notes: <br>
+             <textarea rows=10 cols=35 name="comments">{{ object.comments }}</textarea><br>
+             <input type="submit" name="action", value="Update">
+          </form>
+       </td></tr>
     </table>
     <br>
     {% if message %}

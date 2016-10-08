@@ -291,6 +291,11 @@ def detail(request, object_id):
             request.session['cur_tel_obj'] = request.session.get('prev_tel_obj',
                                                                  'Park')
             request.session['tel_status'] = 'IDLE'
+         elif request.POST['action'] == "Update":
+            comments = request.POST['comments']
+            obj.comments = comments
+            obj.save()
+
       elif 'eyepiece' in request.POST:
          request.session['cur_eye'] = request.POST['eyepiece']
 

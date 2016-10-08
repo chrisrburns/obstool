@@ -27,6 +27,7 @@ class Object(models.Model):
    rating = models.IntegerField() # 1-5 star rating.
    dark = models.BooleanField()   # Dark skies required?
    finder = models.ImageField(upload_to='finders', default='default.gif')
+   comments = models.TextField(max_length=100)
    epoch = None
    tel_az = None
    
