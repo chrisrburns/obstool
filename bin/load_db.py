@@ -5,7 +5,7 @@ The script will query the DSS server and get the finder automatically.'''
 import sys,os
 os.environ['DJANGO_SETTINGS_MODULE'] = 'obstool.settings'
 if 'OBSTOOL_DIR' not in os.environ:
-   print "Plase set your OBSTOOL_DIR environment variable"
+   print "Please set your OBSTOOL_DIR environment variable"
    sys.exit(1)
 sys.path.insert(0, os.environ['OBSTOOL_DIR'])
 sys.path.insert(0, os.path.dirname(os.environ['OBSTOOL_DIR']))
