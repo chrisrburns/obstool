@@ -1,6 +1,7 @@
 {% extends "base_site.html" %}
 {% load myfilters %}
 {% block style %}
+  <link rel="stylesheet" href="/media/css/rating.css">
   <script src="/media/js/sorttable.js"></script>
   <script type="text/javascript" src="/media/js/paper.js"></script>
   <script type="text/javascript" src="/media/js/telescope.js"></script>
@@ -45,6 +46,7 @@
           <input type='submit' name='action' value='GOTO'>
        {% endif %}
     </form>
+    <form action="" method="post">{% csrf_token %}
     <table cellspacing="0" border=0>
        <tr><td>Description:</td><td> {{ object.descr }}</td></tr>
        <tr><td>Type:</td><td> {{ object.objtype }}</td></tr>
@@ -54,15 +56,33 @@
        <tr><td>Vmag: </td><td> {{ object.sMv }} </td></tr>
        <tr><td>Distance: </td><td> {{ object.sdistance }} </td></tr>
        <tr><td>Dark Sky?: </td><td> {% if obj.dark %}D{% endif %} </td></tr>
-       <tr><td>Rating: </td><td> {{ object.srating|safe }} </td></tr>
+       <tr><td>Rating: </td><td> 
+        <span class="starRating">
+          <input id="rating5" type="radio" name="rating" value="5"
+                 {% if object.rating == 5 %}checked{% endif %}>
+          <label for="rating5">5</label>
+          <input id="rating4" type="radio" name="rating" value="4"
+                 {% if object.rating == 4 %}checked{% endif %}>
+          <label for="rating4">4</label>
+          <input id="rating3" type="radio" name="rating" value="3"
+                 {% if object.rating == 3 %}checked{% endif %}>
+          <label for="rating3">3</label>
+          <input id="rating2" type="radio" name="rating" value="2"
+                 {% if object.rating == 2 %}checked{% endif%}>
+          <label for="rating2">2</label>
+          <input id="rating1" type="radio" name="rating" value="1"
+                 {% if object.rating == 1 %}checked{% endif %}>
+                 <label for="rating1">1</label>
+        </span>
+        </td>
+       </tr>
        <tr><td colspan=2>
-          <form action="" method="post">{% csrf_token %}
              Notes: <br>
              <textarea rows=10 cols=35 name="comments">{{ object.comments }}</textarea><br>
              <input type="submit" name="action", value="Update">
-          </form>
        </td></tr>
     </table>
+    </form>
     <br>
     {% if message %}
        <div style="background: #eeffcc;"> 

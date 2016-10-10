@@ -293,7 +293,9 @@ def detail(request, object_id):
             request.session['tel_status'] = 'IDLE'
          elif request.POST['action'] == "Update":
             comments = request.POST['comments']
+            rating = int(request.POST['rating'])
             obj.comments = comments
+            obj.rating = rating
             obj.save()
 
       elif 'eyepiece' in request.POST:
