@@ -54,6 +54,7 @@ def plot_alt_map(objs, date=None, toff=0, new_window=False):
 
    sunset = sunset - 60*ephem.minute
    sunrise = sunrise + 60*ephem.minute
+   print 'Sunset/Sunrize:',sunset,sunrise
 
    for obj in objs:
       eobj = obj.genobj()
@@ -61,8 +62,9 @@ def plot_alt_map(objs, date=None, toff=0, new_window=False):
       if t0 is None or t0 < sunset: t0 = sunset
       if t0 > sunrise: continue
       t1 = obj.set_time()
-      if t1 < sunset: continue
       if t1 is None or t1 > sunrise: t1 = sunrise
+      if t1 < sunset: 
+         continue
 
       tt = date
       if tt < t0:  tt = t0
