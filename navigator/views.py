@@ -39,6 +39,24 @@ class FilterForm(forms.Form):
                 
    new_window = forms.BooleanField(required=False, initial=False)
 
+class AddObjectForm(forms.Form):
+   object_name = forms.CharField(
+         required=False, label='Object Name')
+   object_coordinates = forms.CharField(
+         required=False, label='Object Coordinates (J200)')
+   resolve_choice = forms.ChoiceField(
+         choices=(('simbad','Simbad'),('ned','NED')), 
+         label='Select search facility', required=True)
+
+   def clean(self):
+      cleaned_data = super(AddObjectForm, self).clean()
+      name = cleaned_data.get('object_name').strip()
+      coords = cleaned_data.get('object_coordinates').strip()
+      if (name and coords) or not (name or coords):
+         raise forms.ValidationError("Specify only object name or coordinates")
+      return cleaned_data
+
+
 def get_current_time(request):
    '''Get the current time. This could be 'now' or stored in the session'''
    epoch = None
@@ -466,14 +484,9 @@ def finder(request, objectid):
    outstr = StringIO.StringIO()
    img = Image.open(obj.finder)
    if size and int(size) < settings.FINDER_BASE_SIZE:
-      print size
       size = int(size)
-      print size
       scale = 1.0*settings.FINDER_BASE_SIZE/img.size[0]    # arc-min per pixel
-      print scale
       new_size = int(size/scale)  # New size in pixels
-      print new_size
-      print img.size[0], img.size[1]
       img = img.crop((int(img.size[0]-new_size)/2,
                      int(img.size[1]-new_size)/2,
                      int(img.size[0]+new_size)/2,
@@ -503,4 +516,43 @@ def finder(request, objectid):
    response = HttpResponse(content, content_type="image/png")
    response['Content-Disposition'] = 'inline; filename=%s' % obj.finder.name
    return response
+
+def add_object(request):
+
+   error = None
+   message = None
+   if request.method == 'POST':
+      form = AddObjectForm(request.POST)
+      if form.is_valid():
+         object_name = form.cleaned_data['object_name'].strip()
+         object_coordinates = form.cleaned_data['object_name'].strip()
+         resolve_choice = form.cleaned_data['resolve_choice'].strip()
+         
+         if object_name:
+            data = query.getObjectByName(object_name, 
+                  service=resolve_choice)
+         else:
+            data = query.getObjectByCoord(object_coordinates, 
+                  service=resolve_choice)
+      if data is None:
+         error = "No object found"
+      try:
+         o = Object.objects.get(name=object_name)
+         for key in data:
+            setattr(o, key, data[key])
+         message = "Updated exising object"
+      except ObjectDoesNotExist:
+         o = Object(name=object_name, **data)
+      # Get the finder
+      img = query.get_image(o.RA, o.DEC)
+      o.finder.save('finder_'+o.savename()+'.gif', ContentFile(img))
+      o.save()
+      return HttpResponseRedirect('/navigator/%d' % o.pk)
+
+   t = loader.get_template('navigator/add_object.html')
+
+
+
+
+
 

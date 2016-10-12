@@ -1,5 +1,4 @@
 {% extends "base_site.html" %}
-      Allow from all
 {% load myfilters %}
 {% block style %}
 <script src="/media/js/sorttable.js"></script>
@@ -48,6 +47,10 @@
              onblur="javascript: if(this.value==''){this.value='Search...';}" />
              <input id="searchbutton" type="button"  value="Search" 
                     class="button" onclick="mysearch(this)" />
+
+      <div style="float:right;">
+         <a href="add_object">Add Object</a>
+      </div>
       <table class='sortable' cellspacing="0" border=1 id="result_list">
          <thead>
             <tr>

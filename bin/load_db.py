@@ -39,7 +39,6 @@ for i in range(len(t)):
    star.compute(ephem.J2000)
    args['RA'] = star.ra*180./pi
    args['DEC'] = star.dec*180./pi
-   print "precessed coords:  ",star.ra,star.dec
    args['dark'] = bool(t['dark'][i])
    rating = t['ratin'][i]
    if rating:
