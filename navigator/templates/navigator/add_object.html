@@ -1,0 +1,47 @@
+{% extends "base_site.html" %}
+{% load myfilters %}
+{% block style %}
+  <link rel="stylesheet" href="/media/css/rating.css">
+  <script src="/media/js/sorttable.js"></script>
+  <script type="text/javascript" src="/media/js/paper.js"></script>
+  <script type="text/javascript" src="/media/js/telescope.js"></script>
+  <script type="text/javascript">
+     window.onload = function() {
+        paper.setup('myCanvas');
+        azDome = draw_dome(0.9, 0.2, {{ object.altitude }}, 
+              {{ object.azimuth }});
+        view.draw();
+     }
+  </script>
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+     <a href="../../index.html">Home</a> &rsaquo;
+     <a href="../navigator/">Object Listing</a> &rsaquo;
+     Add Object
+  </div> 
+{% endblock %}
+
+{% block pretitle %} 
+  <h2>Add Object</h2> 
+  <ul class="messagelist">
+     {% if message %}
+        <li> {{ message }} </li>
+     {% endif %}
+     {% if error %}
+        <li class=error> {{ error }} </li>
+     {% endif %}
+  </ul>
+{% endblock %}
+
+{% block content %}
+<form action="" method="post">
+   {% csrf_token %}
+   {{ form.non_field_errrs }}
+   <table border=0>
+      {{ form.as_table }}
+   </table>
+   <input type="submit" value="{{ action }}">
+</form>
+{% endblock %}

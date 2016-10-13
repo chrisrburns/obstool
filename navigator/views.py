@@ -1,7 +1,9 @@
 from django.template import Context, loader, RequestContext
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.files.base import ContentFile
 from navigator.models import Object,genMWO
-from django.http import HttpResponse
+from django.http import HttpResponse,HttpResponseRedirect
 from django.views.decorators.csrf import csrf_protect
 from django import forms
 from obstool import settings
@@ -18,6 +20,8 @@ except:
    import ephem
 from math import pi
 import get_planets
+import utils
+import query
 
 rotations = {'90':Image.ROTATE_90,
              '180':Image.ROTATE_180,
@@ -525,31 +529,44 @@ def add_object(request):
       form = AddObjectForm(request.POST)
       if form.is_valid():
          object_name = form.cleaned_data['object_name'].strip()
-         object_coordinates = form.cleaned_data['object_name'].strip()
+         object_coordinates = form.cleaned_data['object_coordinates'].strip()
          resolve_choice = form.cleaned_data['resolve_choice'].strip()
          
          if object_name:
             data = query.getObjectByName(object_name, 
                   service=resolve_choice)
          else:
-            data = query.getObjectByCoord(object_coordinates, 
-                  service=resolve_choice)
+            # Need to convert into proper RA/DEC
+            # if we have two elements, space-separated, treat as RA/DEC in deg.
+            ra,dec = utils.string2RADEC(object_coordinates)
+            if ra is None:
+               error = "Unrecognized coordinate format"
+               data = None
+            else:
+               data = query.getObjectByCoord(ra,dec, service=resolve_choice)
       if data is None:
-         error = "No object found"
-      try:
-         o = Object.objects.get(name=object_name)
-         for key in data:
-            setattr(o, key, data[key])
-         message = "Updated exising object"
-      except ObjectDoesNotExist:
-         o = Object(name=object_name, **data)
-      # Get the finder
-      img = query.get_image(o.RA, o.DEC)
-      o.finder.save('finder_'+o.savename()+'.gif', ContentFile(img))
-      o.save()
-      return HttpResponseRedirect('/navigator/%d' % o.pk)
+         if error is None:  error = "No object found"
+      else:
+         try:
+            o = Object.objects.get(name=object_name)
+            for key in data:
+               setattr(o, key, data[key])
+            message = "Updated exising object"
+         except ObjectDoesNotExist:
+            message = "Adding object %s" % data['name']
+            o = Object(**data)
+         # Get the finder
+         #img = query.get_image(o.RA, o.DEC)
+         #o.finder.save('finder_'+o.savename()+'.gif', ContentFile(img))
+         #o.save()
+         return HttpResponseRedirect('/navigator/%d' % o.pk)
+   else:
+      form = AddObjectForm()
 
    t = loader.get_template('navigator/add_object.html')
+   c = RequestContext(request, {
+      'form':form, 'message':message, 'error':error, 'action':'add'})
+   return HttpResponse(t.render(c))
 
 
 

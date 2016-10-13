@@ -4,6 +4,8 @@ and extract useful info'''
 from astropy.utils.data import get_readable_fileobj
 from astropy.table import Table
 import urllib
+import cStringIO
+import Image
 
 NED_NAME_QUERY = "http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=%s&zv_breaker=30000.1&list_limit=5&img_stamp=NO"
 
@@ -24,6 +26,22 @@ votable open v1
 votable close
 '''
 
+poss_url = "http://archive.stsci.edu/cgi-bin/dss_search?v=poss2ukstu_red&r=%f&d=%f&e=J2000&h=60.0&w=60.0&f=gif"
+
+def get_image(ra, dec):
+   u = urllib.urlopen(poss_url % (ra,dec))
+   f = cStringIO.StringIO(u.read())
+   u.close()
+   im = Image.open(f)
+   #f.close()
+   x,y = im.size
+   im2 = im.resize((x/2,y/2))
+   f2 = cStringIO.StringIO()
+   im2.save(f2, format='PNG')
+   f.close()
+   retstring = f2.getvalue()
+   f2.close()
+   return retstring
 
 def getObjectByName(name, service='ned'):
    if service not in ['simbad','ned']:
@@ -71,6 +89,9 @@ def getObjectByName(name, service='ned'):
          data['size'] = "%.1f arc-min" % table['GALDIM_MAJAXIS'][0]
       else:
          data['size'] = '--'
+   data['distance'] = -1.
+   data['dark'] = False
+   data['comments'] = 'None'
    return data
 
 def getObjectByCoord(ra, dec, service='ned'):
@@ -121,6 +142,9 @@ def getObjectByCoord(ra, dec, service='ned'):
          data['size'] = "%.1f arc-min" % table['GALDIM_MAJAXIS'][0]
       else:
          data['size'] = '--'
+   data['distance'] = -1.
+   data['dark'] = False
+   data['comments'] = 'None'
    return data
 
 

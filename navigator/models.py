@@ -119,6 +119,8 @@ class Object(models.Model):
          star = self.genobj()
          star.compute(MWO)
          return "%.4f AU" % (star.earth_distance)
+      if dist < 0:
+         return "unknown"
       if dist < 1000.:
          return "%.1f ly" % (dist)
       if dist < 1e6:
