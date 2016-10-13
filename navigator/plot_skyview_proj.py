@@ -126,7 +126,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    # Now we save to a string and also convert to a PIL image, so we can get 
    #  the size.
    output = StringIO.StringIO()
-   canvas.print_figure(output)
+   canvas.print_figure(output, dpi=125, pad_inches=0)
    img_str = 'data:image/png,' + urllib.quote(output.getvalue())
    output.seek(0)
    img = Image.open(output)
@@ -138,7 +138,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
          for o in lines]
    coords = [(b.x0, 1-b.y1, b.x1, 1-b.y0) for b in bboxes]
    
-   HTML = "<img src=\"%s\" usemap=\"#map\" >" % img_str
+   HTML = "<img style=\"margin: -60px -20px -20px -60px\" src=\"%s\" usemap=\"#map\" >" % img_str
    HTML += "<map name=\"map\">\n"
    for i in range(len(names)):
       HTML += "<area shape=rect coords=\"%d %d %d %d\" title=\"%s\" href=\"../navigator/%d/\"" \

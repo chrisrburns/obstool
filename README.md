@@ -16,6 +16,7 @@ Requirements:
   * [Python Imaging Library (PIL) >= 1.1.7](http://www.pythonware.com/products/pil/)
   * [django 1.8.4](https://www.djangoproject.com/)
   * [Paper.js](http://paperjs.org)
+  * [astropy 1.2.1](http://www.astropy.org/)
 
 Screenshot:
 
