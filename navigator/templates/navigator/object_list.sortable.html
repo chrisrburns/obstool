@@ -31,27 +31,48 @@
             window.location = "./search/"+search_string;
          }
    }
+   function openTab(evt, name) {
+      var i;
+      var x = document.getElementsByClassName("TabPanel");
+      for (i = 0; i < x.length ; i++) {
+         x[i].style.display = "none";
+      }
+      tablinks = document.getElementsByClassName("tablink");
+      for (i = 0; i < tablinks.length; i++ ) {
+         tablinks[i].className = tablinks[i].className.replace(" tab-selected","");
+      }
+      document.getElementById(name).style.display = "block";
+      evt.currentTarget.className += " tab-selected";
+   }
 </script>
 {% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="../index.html">Home</a> &rsaquo;Object Listing</div> {% endblock %}
 {% block pretitle %} <h2>Object Listing for {{date}} (UT{{ tz_offset }})<br>
    Sideral time: {{ sid_time }}</h2> {% endblock %}
 {% block content %}
-<div id="content-main">
-   {% if object_list %}
-      <!-- Showing {{ object_list|length }} objects<br>
-      <font size=-3 color="grey">Click on table headers to sort</font> -->
-      <input value="Search..." id="SearchText" style="color:GrayText" 
-             onchange="SearchText" 
-             onfocus="javascript:this.value=''" 
-             onblur="javascript: if(this.value==''){this.value='Search...';}" />
-             <input id="searchbutton" type="button"  value="Search" 
-                    class="button" onclick="mysearch(this)" />
+<div id="content-main" style="width:550px;">
+   <input value="Search..." id="SearchText" style="color:GrayText" 
+          onchange="SearchText" 
+          onfocus="javascript:this.value=''" 
+          onblur="javascript: if(this.value==''){this.value='Search...';}" />
+          <input id="searchbutton" type="button"  value="Search" 
+                 class="button" onclick="mysearch(this)" />
 
-      <div style="float:right;">
-         <a href="add_object">Add Object</a>
-      </div>
-      <table class='sortable' cellspacing="0" border=1 id="result_list">
+   <div style="float:right;">
+      <a href="add_object">Add Object</a>
+   </div>
+   <ul class="tabs">
+      <li><a href="javascript:void(0)" class="tablink tab-selected" 
+             onclick="openTab(event,'table')">List</a></li>
+          <li><a href="javascript:void(0)" class="tablink" 
+             onclick="openTab(event,'skyplot')">Sky</a></li>
+          <li><a href="javascript:void(0)" class="tablink" 
+             onclick="openTab(event,'AltPlot')">Altiude</a></li>
+   </ul>
+   <div class="TabPanel" id="table">
+      {% if object_list %}
+      <table class='sortable' cellspacing="0" border=1 id="result_list"
+         width=100%>
          <thead>
             <tr>
                <th>Rating</th>
@@ -77,10 +98,16 @@
             {% endfor %}
          </tbody>
       </table>
-   {% else %}
-      <p> No objects in database</p>
-   {% endif %}
-   {{ embed_image|safe }}
+      {% else %}
+         <p> No objects in database</p>
+      {% endif %}
+   </div>
+   <div class="TabPanel" id="skyplot" style='display: none;'>
+      {{ embed_image|safe }}
+   </div>
+   <div class="TabPanel" id="AltPlot" style='display: none;'>
+      coming soon...
+   </div>
 </div>
 <div id="content-related" style="margin-right: -25em;">
    <div class="module" id="tinfo">

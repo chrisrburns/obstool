@@ -770,3 +770,25 @@ table#change-history tbody th {
    padding: 0 3px 0 3px;
 }
 
+/* TABS */
+ul.tabs {
+   list-style: none;
+   padding: 10px 0px 10px 0px;
+   margin: 10px 0px 10px 0px ;
+   background-color: lightgrey;
+}
+
+ul.tabs li {
+   display: inline;
+   border: none;
+   margin: 0 5px 0 0;
+}
+
+ul.tabs li a {
+   padding: 0 10px;
+   font-size: 18px;
+}
+
+ul.tabs li a.tab-selected {
+   color: darkgrey;
+}
