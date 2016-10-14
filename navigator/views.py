@@ -47,7 +47,7 @@ class AddObjectForm(forms.Form):
    object_name = forms.CharField(
          required=False, label='Object Name')
    object_coordinates = forms.CharField(
-         required=False, label='Object Coordinates (J200)')
+         required=False, label='Object Coordinates (J2000)')
    resolve_choice = forms.ChoiceField(
          choices=(('simbad','Simbad'),('ned','NED')), 
          label='Select search facility', required=True)
@@ -316,7 +316,7 @@ def detail(request, object_id):
             request.session['tel_status'] = 'IDLE'
          elif request.POST['action'] == "Update":
             comments = request.POST['comments']
-            rating = int(request.POST['rating'])
+            rating = int(request.POST.get('rating',0))
             obj.comments = comments
             obj.rating = rating
             obj.save()
@@ -557,10 +557,10 @@ def add_object(request):
             message = "Adding object %s" % data['name']
             o = Object(**data)
          # Get the finder
-         #img = query.get_image(o.RA, o.DEC)
-         #o.finder.save('finder_'+o.savename()+'.gif', ContentFile(img))
-         #o.save()
-         return HttpResponseRedirect('/navigator/%d' % o.pk)
+         img = query.get_image(o.RA, o.DEC)
+         o.finder.save('finder_'+o.savename()+'.gif', ContentFile(img))
+         o.save()
+         return HttpResponseRedirect('/navigator/%d/' % o.pk)
    else:
       form = AddObjectForm()
 
