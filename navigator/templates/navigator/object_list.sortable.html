@@ -47,10 +47,13 @@
 </script>
 {% endblock %}
 {% block breadcrumbs %}<div class="breadcrumbs"><a href="../index.html">Home</a> &rsaquo;Object Listing</div> {% endblock %}
-{% block pretitle %} <h2>Object Listing for {{date}} (UT{{ tz_offset }})<br>
-   Sideral time: {{ sid_time }}</h2> {% endblock %}
-{% block content %}
-<div id="content-main" style="width:550px;">
+{% block pretitle %}
+<div style="width:570px; float:left;">
+   <h2 style="margin: 0;">Object Listing for {{date}} (UT{{ tz_offset }})<br>
+      Sideral time: {{ sid_time }}
+   </h2>
+</div>
+<div style="float: left; margin-left: 10px;">
    <input value="Search..." id="SearchText" style="color:GrayText" 
           onchange="SearchText" 
           onfocus="javascript:this.value=''" 
@@ -58,9 +61,11 @@
           <input id="searchbutton" type="button"  value="Search" 
                  class="button" onclick="mysearch(this)" />
 
-   <div style="float:right;">
-      <a href="add_object">Add Object</a>
-   </div>
+                 <br><a href="add_object">Add Object</a>
+</div>
+{% endblock %}
+{% block content %}
+<div id="content-main" style="width:550px;">
    <ul class="tabs">
       <li><a href="javascript:void(0)" class="tablink tab-selected" 
              onclick="openTab(event,'table')">List</a></li>
