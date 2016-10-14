@@ -41,6 +41,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
 
    # Setup the graph
    fig = Figure((6,6))
+   fig.subplots_adjust(top=1, bottom=0, left=0, right=1)
    canvas = FigureCanvasAgg(fig)
    ax = fig.add_subplot(111, projection='polar')
    #ax.set_xlabel('Hour Angle')
@@ -77,12 +78,13 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    # Now we save to a string and also convert to a PIL image, so we can get 
    #  the size.
    output = StringIO.StringIO()
-   canvas.print_figure(output)
+   canvas.print_figure(output, pad_inches=0)
    img_str = 'data:image/png,' + urllib.quote(output.getvalue())
    output.seek(0)
    img = Image.open(output)
    output.close()
    xsize,ysize = img.size
+   print xsize,ysize
    
    # Get the window coordinates of the points
    bboxes = [o.get_window_extent().inverse_transformed(fig.transFigure) \
