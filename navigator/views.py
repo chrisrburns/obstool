@@ -177,13 +177,14 @@ def index(request):
 
    embed_image = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt)
+   alt_plot = plot_objs.plot_alt_map(obj_list, date=date, toff=tz_offset) 
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'embed_image':embed_image,
-      'module_display':module_display,
+      'module_display':module_display, 'alt_plot':alt_plot,
       })
    return HttpResponse(t.render(c))
 
