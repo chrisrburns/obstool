@@ -52,7 +52,7 @@ def RAhDecd2xy(RA,DEC,obs):
 
 
 def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
-      tel_alt=90, tel_az=45, imsize=5):
+      tel_alt=90, tel_az=45, imsize=5, crop=100):
    '''Plots the objects for a given night for the given objects (expected to
    be of type Objects).  Returns two strings:  the first is the binary
    PNG file that is the graph, the second is the <map> HTML that will be used
@@ -67,6 +67,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    # Setup the graph
    fig = Figure((imsize,imsize), frameon=False, 
          subplotpars=SubplotParams(left=0.00,right=1.0, bottom=0.0, top=1.))
+   fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
    canvas = FigureCanvasAgg(fig)
    ax = fig.add_subplot(111)
    lines = []
@@ -126,26 +127,28 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    # Now we save to a string and also convert to a PIL image, so we can get 
    #  the size.
    output = StringIO.StringIO()
-   canvas.print_figure(output, dpi=125, pad_inches=0)
-   img_str = 'data:image/png,' + urllib.quote(output.getvalue())
+   canvas.print_figure(output, dpi=150, pad_inches=0)
    output.seek(0)
    img = Image.open(output)
-   output.close()
+   output2 = StringIO.StringIO()
    xsize,ysize = img.size
-   
+   img = img.crop((crop,crop,xsize-crop,ysize-crop))
+   img.save(output2, 'PNG')
+   img_str = 'data:image/png,' + urllib.quote(output2.getvalue())
+   #output.seek(0)
    # Get the window coordinates of the points
    bboxes = [o.get_window_extent().inverse_transformed(fig.transFigure) \
          for o in lines]
    coords = [(b.x0, 1-b.y1, b.x1, 1-b.y0) for b in bboxes]
    
-   HTML = "<img style=\"margin: -60px -20px -20px -60px\" src=\"%s\" usemap=\"#map\" >" % img_str
+   HTML = "<img src=\"%s\" usemap=\"#map\" >" % img_str
    HTML += "<map name=\"map\">\n"
    for i in range(len(names)):
       HTML += "<area shape=rect coords=\"%d %d %d %d\" title=\"%s\" href=\"../navigator/%d/\"" \
-            % (int(coords[i][0]*xsize),
-               int(coords[i][1]*ysize),
-               int(coords[i][2]*xsize),
-               int(coords[i][3]*ysize),
+            % (int(coords[i][0]*xsize)-crop,
+               int(coords[i][1]*ysize)-crop,
+               int(coords[i][2]*xsize)-crop,
+               int(coords[i][3]*ysize)-crop,
                names[i], ids[i])
       if new_window:
          HTML += " target=\"object_window\">\n"
