@@ -52,7 +52,7 @@ def RAhDecd2xy(RA,DEC,obs):
 
 
 def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
-      tel_alt=90, tel_az=45, imsize=5, crop=150):
+      tel_alt=90, tel_az=45, imsize=5, crop=90):
    '''Plots the objects for a given night for the given objects (expected to
    be of type Objects).  Returns two strings:  the first is the binary
    PNG file that is the graph, the second is the <map> HTML that will be used
@@ -141,7 +141,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
          for o in lines]
    coords = [(b.x0, 1-b.y1, b.x1, 1-b.y0) for b in bboxes]
    
-   HTML = "<img src=\"%s\" usemap=\"#map\" >" % img_str
+   HTML = "<img style=\"margin-left:-10px;\" src=\"%s\" usemap=\"#map\" >" % img_str
    HTML += "<map name=\"map\">\n"
    for i in range(len(names)):
       HTML += "<area shape=rect coords=\"%d %d %d %d\" title=\"%s\" href=\"../navigator/%d/\"" \

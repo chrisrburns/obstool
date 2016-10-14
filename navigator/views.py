@@ -140,7 +140,6 @@ def index(request):
    tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
    # Also see if window is to be displayed:
    module_display = request.session.get('module_display', {});
-   print "module_display=",module_display
 
    obs = genMWO(date)
    sid_time = str(obs.sidereal_time())
@@ -429,10 +428,8 @@ def palette(low, high, reverse=None):
 def update_session(request):
    #message = request.GET.get('message', 'nothing')
    if 'var' not in request.POST:
-      print 'var not found'
       return HttpResponse('ok')
    var = request.POST['var']
-   print 'var = ',var
    if 'key' in request.POST and 'val' in request.POST:
       if var not in request.session:
          request.session[var] = {}

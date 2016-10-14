@@ -16,7 +16,6 @@ def string2RADEC(st):
             RA,DEC = hours(fields[0]),degrees(fields[1])
             return RA*180/pi,DEC*180/pi
          except:
-            print "fail 1"
             # Fail!
             return None,None
    elif len(fields) in [4,6]:
@@ -29,11 +28,9 @@ def string2RADEC(st):
          return RA,DEC
       except:
          # Fail!
-         print "fail 2"
          return None,None
    else:
       # Dunno!
-      print "fail 3"
       return None,None
 
 

@@ -54,7 +54,6 @@ def plot_alt_map(objs, date=None, toff=0, new_window=False):
 
    sunset = sunset - 60*ephem.minute
    sunrise = sunrise + 60*ephem.minute
-   print 'Sunset/Sunrize:',sunset,sunrise
 
    for obj in objs:
       eobj = obj.genobj()

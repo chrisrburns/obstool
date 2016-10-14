@@ -106,7 +106,6 @@ def getObjectByCoord(ra, dec, service='ned'):
             table = Table.read(f, format='votable')
       except:
          return None
-      print table.colnames
       data['RA'] = float(table['main_col3'][0])
       data['DEC'] = float(table['main_col4'][0])
       data['objtype'] = table['main_col5'][0]
