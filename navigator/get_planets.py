@@ -37,7 +37,7 @@ def get_image(body, date, fov):
                                   dt.year,
                                   dt.hour,
                                   dt.minute,
-                                  float(fov)*2/settings.FINDER_BASE_SIZE)
+                                  float(fov)*2/60)
 
       u = urllib.urlopen(url)
    except:
