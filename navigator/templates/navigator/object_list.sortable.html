@@ -34,6 +34,12 @@
    function openTab(evt, name) {
       var i;
       var x = document.getElementsByClassName("TabPanel");
+      xhttp = new XMLHttpRequest();
+      getstr = "update_session";
+      sendstr = "csrfmiddlewaretoken={{ csrf_token }}&var=selected_tab&val="+name;
+      xhttp.open("POST", getstr, true);
+      xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      xhttp.send(sendstr);
       for (i = 0; i < x.length ; i++) {
          x[i].style.display = "none";
       }
@@ -67,14 +73,18 @@
 {% block content %}
 <div id="content-main" style="width:550px;">
    <ul class="tabs">
-      <li><a href="javascript:void(0)" class="tablink tab-selected" 
-             onclick="openTab(event,'table')">List</a></li>
-          <li><a href="javascript:void(0)" class="tablink" 
+      <li><a href="javascript:void(0)" 
+        class="tablink {% if selected_tab == 'table' %} tab-selected{% endif %}"
+        onclick="openTab(event,'table')">List</a></li>
+     <li><a href="javascript:void(0)" 
+        class="tablink {% if selected_tab == 'skyplot' %} tab-selected{% endif %}"
              onclick="openTab(event,'skyplot')">Sky</a></li>
-          <li><a href="javascript:void(0)" class="tablink" 
-             onclick="openTab(event,'AltPlot')">Altitude</a></li>
+     <li><a href="javascript:void(0)" 
+        class="tablink {% if selected_tab == 'AltPlot' %} tab-selected{% endif %}" 
+        onclick="openTab(event,'AltPlot')">Altitude</a></li>
    </ul>
-   <div class="TabPanel" id="table">
+   <div class="TabPanel" id="table" 
+      {% if selected_tab != 'table' %}style="display:none;"{% endif %}>
       {% if object_list %}
       <table class='sortable' cellspacing="0" border=1 id="result_list"
          width=100%>
@@ -107,10 +117,12 @@
          <p> No objects in database</p>
       {% endif %}
    </div>
-   <div class="TabPanel" id="skyplot" style='display: none;'>
+   <div class="TabPanel" id="skyplot"
+      {% if selected_tab != 'skyplot' %}style="display:none;"{% endif %}>
       {{ embed_image|safe }}
    </div>
-   <div class="TabPanel" id="AltPlot" style='display: none;'>
+   <div class="TabPanel" id="AltPlot"
+      {% if selected_tab != 'AltPlot' %}style="display:none;"{% endif %}>
       <!-- {{ alt_plot|safe }} -->
       coming soon...
    </div>

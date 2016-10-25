@@ -101,6 +101,7 @@ def index(request):
    #Default:  nothing posted and no session info
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
+   selected_tab = request.session.get('selected_tab', 'table')
    show_types = None
    form = FilterForm()
 
@@ -183,7 +184,8 @@ def index(request):
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'embed_image':embed_image,
-      'module_display':module_display, 'alt_plot':alt_plot,
+      'module_display':module_display, 'alt_plot':alt_plot, 
+      'selected_tab':selected_tab,
       })
    return HttpResponse(t.render(c))
 
