@@ -6,6 +6,16 @@
   <script type="text/javascript" src="/media/js/paper.js"></script>
   <script type="text/javascript" src="/media/js/telescope.js"></script>
   <script type="text/javascript">
+     function update_rating(value) {
+        xhttp = new XMLHttpRequest();
+        getstr = "../update_rating";
+        sendstr = "csrfmiddlewaretoken={{ csrf_token }}&obj={{ object.id }}&rating="+value;
+        xhttp.open("POST", getstr, true);
+        xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        xhttp.send(sendstr);
+     }
+  </script>
+  <script type="text/javascript">
      window.onload = function() {
         paper.setup('myCanvas');
         azDome = draw_dome(0.9, 0.2, {{ object.altitude }}, 
@@ -59,19 +69,24 @@
        <tr><td>Rating: </td><td> 
         <span class="starRating">
           <input id="rating5" type="radio" name="rating" value="5"
-                 {% if object.rating == 5 %}checked{% endif %}>
+                 {% if object.rating == 5 %}checked{% endif %}
+                 onclick="update_rating(5)">
           <label for="rating5">5</label>
           <input id="rating4" type="radio" name="rating" value="4"
-                 {% if object.rating == 4 %}checked{% endif %}>
+                 {% if object.rating == 4 %}checked{% endif %}
+                 onclick="update_rating(4)">
           <label for="rating4">4</label>
           <input id="rating3" type="radio" name="rating" value="3"
-                 {% if object.rating == 3 %}checked{% endif %}>
+                 {% if object.rating == 3 %}checked{% endif %}
+                 onclick="update_rating(3)">
           <label for="rating3">3</label>
           <input id="rating2" type="radio" name="rating" value="2"
-                 {% if object.rating == 2 %}checked{% endif%}>
+                 {% if object.rating == 2 %}checked{% endif%}
+                 onclick="update_rating(2)">
           <label for="rating2">2</label>
           <input id="rating1" type="radio" name="rating" value="1"
-                 {% if object.rating == 1 %}checked{% endif %}>
+                 {% if object.rating == 1 %}checked{% endif %}
+                 onclick="update_rating(1)">
                  <label for="rating1">1</label>
         </span>
         </td>

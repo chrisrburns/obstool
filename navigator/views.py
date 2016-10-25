@@ -444,6 +444,17 @@ def update_session(request):
    request.session.modified = True
    return HttpResponse('ok')
 
+@csrf_protect
+def update_rating(request):
+   if 'obj' not in request.POST or 'rating' not in request.POST:
+      return HttpResponse('ok')
+   objectid = int(request.POST['obj'])
+   obj = Object.objects.get(id=objectid)
+   rating = int(request.POST['rating'])
+   obj.rating = rating
+   obj.save()
+   return HttpResponse('ok')
+
 def finder(request, objectid):
    obj = Object.objects.get(id=objectid)
    flip = request.GET.get('flip',None)
