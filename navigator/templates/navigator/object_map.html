@@ -2,6 +2,9 @@
       Allow from all
 {% load myfilters %}
 {% block style %}
+<script src="/media/js/bokeh.min.js"></script>
+<link rel="stylesheet" href="/media/css/bokeh.min.css">
+{{ script|safe }}
 <script src="/media/js/sorttable.js"></script>
 <script type="text/javascript">
    function hide_section(element) {
@@ -38,8 +41,8 @@
 {% block pretitle %} <h2>Object Map for {{date}} (UT{{ tz_offset }})
    Sideral time: {{ sid_time }}</h2> {% endblock %}
 {% block content %}
-<div id="content-main">
-   {{ embed_image|safe }}
+<div id="content-main" style="width: 550px;">
+   {{ div|safe }}
 </div>
 <div id="content-related" style="margin-right: -25em;">
    <div class="module" id="tinfo">

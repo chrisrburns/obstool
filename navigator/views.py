@@ -9,10 +9,11 @@ from django import forms
 from obstool import settings
 import datetime
 #import plot_ams_phases,plot_ams_HA
-import plot_skyview_proj as plot_skyview
-import plot_objs
+import plot_skyview_bokeh as plot_skyview
+import plot_objs_bokeh as plot_objs
 import StringIO
-import Image, ImageDraw
+#import Image, ImageDraw
+from PIL import Image,ImageDraw
 from numpy import argsort,mean
 try:
    import ephem3 as ephem
@@ -175,16 +176,16 @@ def index(request):
    else:
       stz_offset = ""
 
-   embed_image = plot_skyview.plot_sky_map(obj_list, date=date, 
+   script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt)
-   alt_plot = plot_objs.plot_alt_map(obj_list, date=date, toff=tz_offset) 
+   #alt_plot = plot_objs.plot_alt_map(obj_list, date=date, toff=tz_offset) 
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
-      'tel_az':tel_az,'sid_time':sid_time,'embed_image':embed_image,
-      'module_display':module_display, 'alt_plot':alt_plot, 
+      'tel_az':tel_az,'sid_time':sid_time,'script':script,'div':div,
+      'module_display':module_display,
       'selected_tab':selected_tab,
       })
    return HttpResponse(t.render(c))
@@ -272,14 +273,14 @@ def mapview(request):
    else:
       stz_offset = ""
 
-   embed_image = plot_skyview.plot_sky_map(obj_list, date=date, 
-         tel_az=tel_az, tel_alt=tel_alt, imsize=7)
+   script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
+         tel_az=tel_az, tel_alt=tel_alt)
    t = loader.get_template('navigator/object_map.html')
    c = RequestContext(request, {
       'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
-      'tel_az':tel_az,'sid_time':sid_time,'embed_image':embed_image,
+      'tel_az':tel_az,'sid_time':sid_time,'script':script, 'div':div,
       'module_display':module_display,
       })
    return HttpResponse(t.render(c))
@@ -383,7 +384,7 @@ def detail(request, object_id):
       ra_move = None
       dec_move = None
       tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
-   embed_plot = plot_objs.plot_alt_map([obj], date=date, toff=tz_offset) 
+   script,div = plot_objs.plot_alt_map([obj], date=date, toff=tz_offset) 
    c = RequestContext(request, {
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
@@ -392,7 +393,7 @@ def detail(request, object_id):
       'message':message, 'error':error, 'epoch':epoch,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move,
-      'ra_move':ra_move, 'dec_move':dec_move, 'embed_plot':embed_plot,
+      'ra_move':ra_move, 'dec_move':dec_move, 'script':script, 'div':div,
       })
    return HttpResponse(t.render(c))
 

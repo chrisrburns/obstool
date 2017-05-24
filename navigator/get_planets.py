@@ -14,7 +14,7 @@ codes = {'Moon':'301',
          'Pluto':'999'}
 
 import urllib
-import Image
+from PIL import Image
 import cStringIO
 import ephem
 import datetime

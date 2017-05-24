@@ -1,7 +1,10 @@
 {% extends "base_site.html" %}
 {% load myfilters %}
 {% block style %}
-<script src="/media/js/sorttable.js"></script>
+<script src="/media/js/bokeh.min.js"></script>
+<link rel="stylesheet" href="/media/css/bokeh.min.css">
+{{ script|safe }}
+{{ script2|safe }}
 <script type="text/javascript">
    function hide_section(element) {
       xhttp = new XMLHttpRequest();
@@ -79,9 +82,6 @@
      <li><a href="javascript:void(0)" 
         class="tablink {% if selected_tab == 'skyplot' %} tab-selected{% endif %}"
              onclick="openTab(event,'skyplot')">Sky</a></li>
-     <li><a href="javascript:void(0)" 
-        class="tablink {% if selected_tab == 'AltPlot' %} tab-selected{% endif %}" 
-        onclick="openTab(event,'AltPlot')">Altitude</a></li>
    </ul>
    <div class="TabPanel" id="table" 
       {% if selected_tab != 'table' %}style="display:none;"{% endif %}>
@@ -119,12 +119,7 @@
    </div>
    <div class="TabPanel" id="skyplot"
       {% if selected_tab != 'skyplot' %}style="display:none;"{% endif %}>
-      {{ embed_image|safe }}
-   </div>
-   <div class="TabPanel" id="AltPlot"
-      {% if selected_tab != 'AltPlot' %}style="display:none;"{% endif %}>
-      <!-- {{ alt_plot|safe }} -->
-      coming soon...
+      {{ div|safe }}
    </div>
 </div>
 <div id="content-related" style="margin-right: -25em;">
