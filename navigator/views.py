@@ -316,12 +316,19 @@ def detail(request, object_id):
             request.session['cur_tel_obj'] = request.session.get('prev_tel_obj',
                                                                  'Park')
             request.session['tel_status'] = 'IDLE'
+            request.session['delete_object'] = 'None'
          elif request.POST['action'] == "Update":
             comments = request.POST['comments']
             rating = int(request.POST.get('rating',0))
             obj.comments = comments
             obj.rating = rating
             obj.save()
+         elif request.POST['action'] == "Delete":
+            request.session['delete_object'] = 'confirm'
+         elif request.POST['action'] == "Confirm":
+            request.session['delete_object'] = 'None'
+            obj.delete()
+            return HttpResponseRedirect('/navigator/')
 
       elif 'eyepiece' in request.POST:
          request.session['cur_eye'] = request.POST['eyepiece']
@@ -329,6 +336,7 @@ def detail(request, object_id):
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
    tel_status = request.session.get('tel_status', 'IDLE')
+   delete_object = request.session.get('delete_object', 'None')
 
    eyepiece = request.session.get('cur_eye', None)
    if eyepiece is not None:
@@ -394,6 +402,7 @@ def detail(request, object_id):
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move,
       'ra_move':ra_move, 'dec_move':dec_move, 'script':script, 'div':div,
+      'delete_object':delete_object,
       })
    return HttpResponse(t.render(c))
 
