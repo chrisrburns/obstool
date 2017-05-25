@@ -5,7 +5,7 @@ from astropy.utils.data import get_readable_fileobj
 from astropy.table import Table
 import urllib
 import cStringIO
-import Image
+from PIL import Image
 
 NED_NAME_QUERY = "http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=%s&zv_breaker=30000.1&list_limit=5&img_stamp=NO"
 
