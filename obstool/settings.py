@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+# Find Bokeh
+import bokeh
+BOKEH_JS = os.path.join(os.path.dirname(bokeh.__file__),'server','static','js')
+BOKEH_CSS = os.path.join(os.path.dirname(bokeh.__file__),'server','static','css')
 # Here are some site-wide configuration settings that can be changed 
 # on a per-user basis:
 # The 3-D position of the observing site
