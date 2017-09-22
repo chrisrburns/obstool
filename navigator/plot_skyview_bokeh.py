@@ -170,7 +170,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
          f('rho','theta',source=sources[key], **args)
             
    # Telescope pos
-   theta = -(float(tel_az)*pi/180-pi/2)
+   theta = float(tel_az)*pi/180
    rho = 90 - float(tel_alt)
    fig.annulus([rho], [theta], 7, 8, inner_radius_units='screen',
          outer_radius_units='screen', fill_color='red')
