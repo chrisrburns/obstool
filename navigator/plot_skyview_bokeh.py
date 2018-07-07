@@ -23,13 +23,14 @@ import pickle
 from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.units import degree
 from astropy.time import Time
+import time
 
 
 
 # The constellation data.
-conlines = os.path.join(os.path.dirname(__file__), 'Conlines2.pkl')
+conlines = os.path.join(os.path.dirname(__file__), 'Conlines3.pkl')
 f = open(conlines)
-d = pickle.load(f)
+ra1s,ra2s,dec1s,dec2s = pickle.load(f)
 f.close()
 
 MWO = EarthLocation.of_site('mwo')
@@ -80,7 +81,7 @@ def RAhDecd2AltAz(RA,DEC,utctime):
    radec = SkyCoord(RA, DEC, frame='icrs', unit=degree)
    altaz = radec.transform_to(AltAz(obstime=utctime, location=MWO))
    clip=less(altaz.alt, 0)
-   return (90 - altaz.alt.value, altaz.az.value*pi/180.0, clip)
+   return (90. - altaz.alt.value, altaz.az.value*pi/180.0, clip)
 
 
 def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
@@ -89,6 +90,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    be of type Objects).  Returns two strings:  the <script> element that should
    be placed in the header, and the <div> that should be placed where you want
    the graph to show up.'''
+   t1 = time.time()
    if date is None:
       date = ephem.now()
    else:
@@ -177,26 +179,20 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
          outer_radius_units='screen', fill_color='red')
 
    # Try some constellations
-   for cons in d:
-      ra1s,ra2s,dec1s,dec2s = d[cons]
+   x1s,y1s,clip1 = RAhDecd2AltAz(ra1s, dec1s, 
+                 Time(date+2415020, format='jd'))
+   x2s,y2s,clip2 = RAhDecd2AltAz(ra2s, dec2s, 
+                 Time(date+2415020, format='jd'))
+   gids = ~clip1 & ~clip2
 
-      x1s,y1s,clip1 = RAhDecd2AltAz(ra1s, dec1s, 
-                    Time(date+2415020, format='jd'))
-      x2s,y2s,clip2 = RAhDecd2AltAz(ra1s, dec1s, 
-                    Time(date+2415020, format='jd'))
-      gids = clip1 & clip2
-
-      if not sometrue(gids):
-         continue
-
-
-      x1s = x1s[gids]; x2s = x2s[gids]; y1s = y1s[gids]; y2s = y2s[gids]
-      print x1s,x2s,y1s,y2s
-      fig.segment(x1s,y1s,x2s,y2s, line_color='gray', line_width=0.5)
+   x1s = x1s[gids]; x2s = x2s[gids]; y1s = y1s[gids]; y2s = y2s[gids]
+   fig.segment(x1s,y1s,x2s,y2s, line_color='gray', line_width=0.5)
 
    fig.grid()
    fig.taxis_label()
    script,div = components(fig.figure, CDN)
+   t2 = time.time()
+   print "plotsky time:", t2-t1
 
    return(script,div)
 
