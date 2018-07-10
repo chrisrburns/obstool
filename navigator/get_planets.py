@@ -1,7 +1,7 @@
 '''This module uses the NASA solar system simulator to fetch an image of
 a planetary body as seen from earth at a particular time.'''
 
-base_url = "http://space.jpl.nasa.gov/cgi-bin/wspace?tbody=%s&vbody=399&month=%d&day=%d&year=%d&hour=%d&minute=%d&fovmul=1&rfov=%.4f&bfov=30&showac=1"
+base_url = "https://space.jpl.nasa.gov/cgi-bin/wspace?tbody=%s&vbody=399&month=%d&day=%d&year=%d&hour=%d&minute=%d&fovmul=1&rfov=%.4f&bfov=30&showac=1"
 
 codes = {'Moon':'301',
          'Mercury':'199',
