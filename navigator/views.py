@@ -25,10 +25,45 @@ import get_planets
 import utils
 import query
 
+def type_included(typ, show_types):
+   if 'All' in show_types:
+      return True
+   if typ[0:2] == 'G-':
+      if u'Galaxies' in show_types:
+         return True
+   if typ in ['E/RN','EN','EN-OC','E/DN','RN','SNR'] and \
+         u'Nebulae' in show_types:
+         return True
+   if typ == 'GC' and u'GC' in show_types:
+      return True
+   if typ == 'SS' and u'Planets' in show_types:
+      return True
+   if typ == 'PN' and u'PNe' in show_types:
+      return True
+   if typ == 'OC' and u'OCs' in show_types:
+      return True
+   if typ == 'QSO' and u'QSOs' in show_types:
+      return True
+   if typ in ['Double','Triple'] and u"Stars" in show_types:
+      return True
+   return False
+
 rotations = {'90':Image.ROTATE_90,
              '180':Image.ROTATE_180,
              '270':Image.ROTATE_270,
              '-90':Image.ROTATE_270}
+
+TYPE_CHOICES = (
+      ('All','All'),
+      ('Galaxies','Galaxies'),
+      ('Planets','Planets'),
+      ('Stars','Stars'),
+      ('PNe','PNe'),
+      ('Nebulae','Nebulae'),
+      ('GCs','GCs'),
+      ('OCs','OCs'),
+      ('QSOs','QSOs'))
+
 
 class FilterForm(forms.Form):
    ha_high = forms.FloatField(min_value=0.0, required=False,
@@ -37,6 +72,10 @@ class FilterForm(forms.Form):
    rating_low = forms.IntegerField(required=False,
          label='rating >', initial=0,
          widget=forms.TextInput(attrs={'size':'5'}))
+   show_types = forms.MultipleChoiceField(required=False,
+                      choices=TYPE_CHOICES,
+                      initial=['All'],
+                      widget=forms.CheckboxSelectMultiple)
    only_visible = forms.BooleanField(required=False, label='Only Visible')
    # Settings
    epoch = forms.DateTimeField(required=False)
@@ -44,6 +83,7 @@ class FilterForm(forms.Form):
          widget=forms.TextInput(attrs={'size':'5'}))
                 
    new_window = forms.BooleanField(required=False, initial=False)
+   auto_reload = forms.BooleanField(required=False, initial=True)
 
 class AddObjectForm(forms.Form):
    object_name = forms.CharField(
@@ -99,19 +139,25 @@ def index(request):
    epoch = None
    rating_low = None
    new_window = False
+   auto_reload = True
    tz_offset = 0
    #Default:  nothing posted and no session info
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
    selected_tab = request.session.get('selected_tab', 'table')
-   show_types = None
+   show_types = ['All']
    form = FilterForm()
 
    if request.method == "POST":
       if request.POST.get('action','') == 'Update':
          form = FilterForm(request.POST)
          # save this form info into the session cache
-         request.session['object_list_form'] = request.POST.copy()
+         if form.is_valid():
+            request.session['object_list_form'] = form.cleaned_data.copy()
+         #newd = {}
+         #newd.update(request.POST)
+         #newd['show_types'] = request.POST.get('show_types')
+         #request.session['object_list_form'] = newd
       elif request.POST.get('action','') == 'Park':
          request.session['cur_tel_obj'] = 'Park'
          cur_tel_obj = 'Park'
@@ -126,11 +172,12 @@ def index(request):
    if form.is_valid():
       only_visible = form.cleaned_data.get('only_visible',None)
       ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
-      show_types = form.cleaned_data.get('show_types', None)
+      show_types = form.cleaned_data.get('show_types', ['All'])
       rating_low = form.cleaned_data.get('rating_low',None)
       epoch = form.cleaned_data.get('epoch',None)
       tz_offset =form.cleaned_data.get('tz_offset', 0)
       new_window = form.cleaned_data.get('new_window',False)
+      auto_reload = form.cleaned_data.get('auto_reload',False)
 
    if tz_offset is None:
       tz_offset = 0
@@ -152,14 +199,14 @@ def index(request):
    d = {}
    RAoffset = obs.sidereal_time()*180/pi    # Now in degrees
    if (only_visible is not None and only_visible):
-      sql += " WHERE RA-%s > %s AND RA-%s < %s AND DEC > %s"
+      sql += " WHERE (RA-%s > %s AND RA-%s < %s AND DEC > %s) or objtype = 'SS'"
       l = [RAoffset, -settings.HA_LIMIT*15, RAoffset, settings.HA_LIMIT*15,
             settings.DEC_LIMIT]
    elif ha_high is not None:
-      sql += " WHERE RA-%s > %s AND RA-%s < %s"
+      sql += " WHERE (RA-%s > %s AND RA-%s < %s) OR objtype = 'SS'"
       l = [RAoffset, -settings.HA_LIMIT*15, RAoffset, settings.HA_LIMIT*15]
    else:
-      sql += " WHERE (RA-%s > -90 AND RA-%s < 90) OR DEC > %s"
+      sql += " WHERE (RA-%s > -90 AND RA-%s < 90) OR DEC > %s OR objtype = 'SS'"
       l = [RAoffset, RAoffset, 90-obs.lat*180/pi]
 
    if rating_low is not None:
@@ -170,7 +217,8 @@ def index(request):
    obj_list = Object.objects.raw(sql, l)
 
    if show_types is not None:
-      obj_list = [obj for obj in obj_list if obj.type in show_types]
+      obj_list = [obj for obj in obj_list if \
+            type_included(obj.objtype,show_types)]
    newlist = []
    for obj in obj_list:  
       obj.epoch = date
@@ -194,6 +242,7 @@ def index(request):
    c = RequestContext(request, {
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
+      'auto_reload':auto_reload,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'script':script,'div':div,
       'module_display':module_display,

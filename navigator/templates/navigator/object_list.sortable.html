@@ -1,7 +1,7 @@
 {% extends "base_site.html" %}
 {% load myfilters %}
 {% block style %}
-<meta http-equiv="refresh" content="30">
+{% if auto_reload %} <meta http-equiv="refresh" content="30"> {% endif %}
 <script src="/media/js/bokeh.min.js"></script>
 <link rel="stylesheet" href="/media/css/bokeh.min.css">
 {{ script|safe }}
@@ -169,6 +169,9 @@
                              PST = -8</font>
             </div><br>
             {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
+            <br>
+            {{ form.auto_reload.errors }} {{ form.auto_reload }} Refresh Automatically
+            <br>
   
            <input type="submit" name='action' value="Update">
            <input type="submit" name='action' value="Reset">
@@ -185,8 +188,10 @@
            <br>
            |HA| &le; {{ form.ha_high.errors }} {{ form.ha_high}}
            <br>
+           Types: {{ form.show_types.errors }} {{ form.show_types }}
+           <br>
            {{ form.only_visible.errors }}
-           <label for="id_only_visible">Only visible:</label> {{ form.only_visible }}
+           <label for="id_only_visible">Telescope Limits:</label> {{ form.only_visible }}
            <br>
            <input type="submit" name='action' value="Update">
            <input type="submit" name='action' value="Reset">

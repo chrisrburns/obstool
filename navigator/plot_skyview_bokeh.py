@@ -192,7 +192,6 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    fig.taxis_label()
    script,div = components(fig.figure, CDN)
    t2 = time.time()
-   print "plotsky time:", t2-t1
 
    return(script,div)
 
