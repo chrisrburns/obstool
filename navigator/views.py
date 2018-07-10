@@ -1,5 +1,6 @@
 from django.template import Context, loader, RequestContext
 from django.db import models
+from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from navigator.models import Object,genMWO
@@ -145,26 +146,36 @@ def index(request):
 
    obs = genMWO(date)
    sid_time = str(obs.sidereal_time())
-   obj_list = Object.objects.all()
-   for obj in obj_list:
-      obj.epoch = date
-      obj.tel_az = float(tel_az)
-   obj_list = sorted(obj_list, key=lambda a: float(a.PrecRAh()))
+   # Let's be a little smarter here. If we are imposing telescope limits
+   # or an hour-angle limit, that will cut down on objects
+   sql = 'SELECT * from navigator_object'
+   d = {}
+   RAoffset = obs.sidereal_time()*180/pi    # Now in degrees
+   if (only_visible is not None and only_visible):
+      sql += " WHERE RA-%s > %s AND RA-%s < %s AND DEC > %s"
+      l = [RAoffset, -settings.HA_LIMIT*15, RAoffset, settings.HA_LIMIT*15,
+            settings.DEC_LIMIT]
+   elif ha_high is not None:
+      sql += " WHERE RA-%s > %s AND RA-%s < %s"
+      l = [RAoffset, -settings.HA_LIMIT*15, RAoffset, settings.HA_LIMIT*15]
+   else:
+      sql += " WHERE (RA-%s > -90 AND RA-%s < 90) OR DEC > %s"
+      l = [RAoffset, RAoffset, 90-obs.lat*180/pi]
 
-   new_list = []
+   if rating_low is not None:
+      sql += " AND rating >= %s"
+      l.append(rating_low)
+   sql += " ORDER BY RA-%s"
+   l.append(RAoffset)
+   obj_list = Object.objects.raw(sql, l)
+
+   if show_types is not None:
+      obj_list = [obj for obj in obj_list if obj.type in show_types]
+   newlist = []
    for obj in obj_list:  
-      #obj.epoch = date
-      if only_visible is not None and only_visible and not obj.visible():
-         continue
-      if ha_high is not None and \
-         abs(obj.hour_angle()) > ha_high:
-         continue
-      if rating_low is not None and obj.rating < rating_low:
-         continue
-      if show_types is not None and obj.type not in show_types:
-         continue
-      new_list.append(obj)
-   obj_list = new_list
+      obj.epoch = date
+      newlist.append(obj)
+   obj_list = newlist
 
    if epoch:
       sdate = epoch.strftime('%m/%d/%y %H:%M:%S')
@@ -177,7 +188,7 @@ def index(request):
       stz_offset = ""
 
    script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
-         tel_az=tel_az, tel_alt=tel_alt)
+         tel_az=tel_az, tel_alt=tel_alt, new_window=new_window)
    #alt_plot = plot_objs.plot_alt_map(obj_list, date=date, toff=tz_offset) 
    t = loader.get_template('navigator/object_list.sortable.html')
    c = RequestContext(request, {
