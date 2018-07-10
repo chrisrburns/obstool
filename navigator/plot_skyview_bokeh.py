@@ -20,14 +20,20 @@ except:
    import ephem
 import pickle
 
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz
+from astropy.units import degree
+from astropy.time import Time
+import time
+
 
 
 # The constellation data.
-conlines = os.path.join(os.path.dirname(__file__), 'Conlines.pkl')
+conlines = os.path.join(os.path.dirname(__file__), 'Conlines3.pkl')
 f = open(conlines)
-d = pickle.load(f)
+ra1s,ra2s,dec1s,dec2s = pickle.load(f)
 f.close()
 
+MWO = EarthLocation.of_site('mwo')
 
 # How to plot different types. The dictionary is keyed by object type. the value
 # is a list of plotting instructions. Some objects are plotted with multiple
@@ -68,18 +74,14 @@ def osymb(s):
    # default:
    return [('asterisk', {'size':6,'name':'obj'})]
 
-def RAhDecd2AltAz(RA,DEC,obs):
+def RAhDecd2AltAz(RA,DEC,utctime):
    '''Given an RA/DEC of a constallation vertex, return alt/Az on the sky.
    We let polar.py deal with converting to x,y on the screen. If the vertex
    is below the horizon, set clip=True'''
-   o = ephem.FixedBody()
-   o._ra = ephem.degrees(RA*15*pi/180)
-   o._dec = ephem.degrees(DEC*pi/180)
-   o._epoch = ephem.J2000
-   o.compute(obs)
-   clip=False 
-   if o.alt*180.0/pi < 0: clip=True
-   return ((pi/2-o.alt)*180/pi, o.az, clip)
+   radec = SkyCoord(RA, DEC, frame='icrs', unit=degree)
+   altaz = radec.transform_to(AltAz(obstime=utctime, location=MWO))
+   clip=less(altaz.alt, 0)
+   return (90. - altaz.alt.value, altaz.az.value*pi/180.0, clip)
 
 
 def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
@@ -88,6 +90,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    be of type Objects).  Returns two strings:  the <script> element that should
    be placed in the header, and the <div> that should be placed where you want
    the graph to show up.'''
+   t1 = time.time()
    if date is None:
       date = ephem.now()
    else:
@@ -176,37 +179,19 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
          outer_radius_units='screen', fill_color='red')
 
    # Try some constellations
-   for cons in d:
-      draw = False
-      ras,decs = d[cons]
-      x1s,x2s,y1s,y2s = [],[],[],[]
+   x1s,y1s,clip1 = RAhDecd2AltAz(ra1s, dec1s, 
+                 Time(date+2415020, format='jd'))
+   x2s,y2s,clip2 = RAhDecd2AltAz(ra2s, dec2s, 
+                 Time(date+2415020, format='jd'))
+   gids = ~clip1 & ~clip2
 
-      pendown=False
-      for i in range(0,len(ras)):
-         if ras[i] is not None:
-            x,y,clip = RAhDecd2AltAz(ras[i],decs[i],MWO)
-            if not clip: draw = True
-            if pendown:
-               x2s.append(x)
-               y2s.append(y)
-               x1s.append(x)
-               y1s.append(y)
-            else:
-               pendown=True
-               x1s.append(x)
-               y1s.append(y)
-         else:
-            pendown=False
-            x1s = x1s[:-1]
-            y1s = y1s[:-1]
-      if draw:
-         x1s = array(x1s); x2s = array(x2s)
-         y1s = array(y1s); y2s = array(y2s)
-         fig.segment(x1s,y1s,x2s,y2s, line_color='gray', line_width=0.5)
+   x1s = x1s[gids]; x2s = x2s[gids]; y1s = y1s[gids]; y2s = y2s[gids]
+   fig.segment(x1s,y1s,x2s,y2s, line_color='gray', line_width=0.5)
 
    fig.grid()
    fig.taxis_label()
    script,div = components(fig.figure, CDN)
+   t2 = time.time()
 
    return(script,div)
 

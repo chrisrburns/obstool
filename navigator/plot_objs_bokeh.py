@@ -92,7 +92,7 @@ def plot_alt_map(objs, date=None, toff=0, new_window=False, imsize=300):
       line_data['alt'] = array(line_data['alt'])
 
       mid = argmax(line_data['alt'])
-      merid = ephem.Date(ts[mid])
+      merid = ephem.Date(ts[mid]+toff)
       maxalt = line_data['alt'][mid]
       title = "Meridian @ %s (%.1fd)" % (str(merid).split()[1], maxalt)
       if len(objs) == 1:
