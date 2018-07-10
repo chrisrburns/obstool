@@ -78,7 +78,8 @@ class FilterForm(forms.Form):
                       widget=forms.CheckboxSelectMultiple)
    only_visible = forms.BooleanField(required=False, label='Only Visible')
    # Settings
-   epoch = forms.DateTimeField(required=False)
+   epoch = forms.CharField(required=False, 
+         widget=forms.TextInput(attrs={'size':20}))
    tz_offset = forms.FloatField(required=False, initial=0,
          widget=forms.TextInput(attrs={'size':'5'}))
                 
@@ -108,7 +109,7 @@ def get_current_time(request):
    epoch = None
    tz_offset = 0
    if 'object_list_form' in request.session:
-      epoch = str(request.session['object_list_form']['epoch'])
+      epoch = request.session['object_list_form']['epoch'].encode('ascii','ignore')
       tz_offset = float(request.session['object_list_form']['tz_offset'])
       if tz_offset is None:
          tz_offset = 0
@@ -174,15 +175,15 @@ def index(request):
       ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
       show_types = form.cleaned_data.get('show_types', ['All'])
       rating_low = form.cleaned_data.get('rating_low',None)
-      epoch = form.cleaned_data.get('epoch',None)
+      epoch = form.cleaned_data.get('epoch',None).encode('ascii','ignore')
       tz_offset =form.cleaned_data.get('tz_offset', 0)
       new_window = form.cleaned_data.get('new_window',False)
       auto_reload = form.cleaned_data.get('auto_reload',False)
 
    if tz_offset is None:
       tz_offset = 0
-   if epoch:  
-      date = ephem.Date(epoch) - tz_offset*ephem.hour
+   if epoch:
+      date = ephem.Date(ephem.Date(epoch) - tz_offset*ephem.hour)
    else:
       date = ephem.now()
 
@@ -196,7 +197,6 @@ def index(request):
    # Let's be a little smarter here. If we are imposing telescope limits
    # or an hour-angle limit, that will cut down on objects
    sql = 'SELECT * from navigator_object'
-   d = {}
    RAoffset = obs.sidereal_time()*180/pi    # Now in degrees
    if (only_visible is not None and only_visible):
       sql += " WHERE (RA-%s > %s AND RA-%s < %s AND DEC > %s) or objtype = 'SS'"
@@ -204,7 +204,7 @@ def index(request):
             settings.DEC_LIMIT]
    elif ha_high is not None:
       sql += " WHERE (RA-%s > %s AND RA-%s < %s) OR objtype = 'SS'"
-      l = [RAoffset, -settings.HA_LIMIT*15, RAoffset, settings.HA_LIMIT*15]
+      l = [RAoffset, -ha_high*15, RAoffset, ha_high*15]
    else:
       sql += " WHERE (RA-%s > -90 AND RA-%s < 90) OR DEC > %s OR objtype = 'SS'"
       l = [RAoffset, RAoffset, 90-obs.lat*180/pi]
@@ -212,8 +212,6 @@ def index(request):
    if rating_low is not None:
       sql += " AND rating >= %s"
       l.append(rating_low)
-   sql += " ORDER BY RA-%s"
-   l.append(RAoffset)
    obj_list = Object.objects.raw(sql, l)
 
    if show_types is not None:
@@ -222,14 +220,16 @@ def index(request):
    newlist = []
    for obj in obj_list:  
       obj.epoch = date
+      if obj.objtype == 'SS':
+         if only_visible is not None and only_visible and not obj.visible():
+            continue
+         elif ha_high is not None and abs(obj.hour_angle()) > ha_high:
+            continue
       newlist.append(obj)
    obj_list = newlist
 
-   if epoch:
-      sdate = epoch.strftime('%m/%d/%y %H:%M:%S')
-   else:
-      sdate = ephem.Date(ephem.now()+tz_offset*ephem.hour)
-      sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
+   sdate = ephem.Date(date+tz_offset*ephem.hour)
+   sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
    if tz_offset != 0:
       stz_offset = "%.1f" % (tz_offset)
    else:
