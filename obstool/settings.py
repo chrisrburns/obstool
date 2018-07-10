@@ -34,6 +34,8 @@ ALT_SOFT_LIMIT = 40.0
 HA_LIMIT = 4.0
 # This is a soft limit that maybe the user should be worried
 HA_SOFT_LIMIT = 3.0
+# Declination limit
+DEC_LIMIT = -27.0
 
 # eyepieces and field-of-views
 fovs = {
