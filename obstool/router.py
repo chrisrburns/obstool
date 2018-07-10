@@ -8,7 +8,6 @@ class MyAppRouter(object):
 
    def db_for_read(self, model, **hints):
       '''Point all 'objects' to the objects database.'''
-      print model._meta.app_label
       if model._meta.app_label == 'navigator':
          return 'objects'
       return None
