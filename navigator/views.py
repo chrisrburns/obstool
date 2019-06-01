@@ -478,9 +478,12 @@ def search_name(request, object_name):
    else:
       message = "Found %d objects matching your pattern" % len(objs)
 
+   new_window = False
+   if 'object_list_form' in request.session:
+      new_window = request.session['object_list_form'].get('new_window', False)
    t = loader.get_template('navigator/object_search.html')
    c = Context({
-      'objects':objs, 'message':message, 'error':error,
+      'objects':objs, 'message':message, 'error':error, 'new_window':new_window,
       })
    return HttpResponse(t.render(c))
 

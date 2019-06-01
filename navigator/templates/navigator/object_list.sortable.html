@@ -1,7 +1,7 @@
 {% extends "base_site.html" %}
 {% load myfilters %}
 {% block style %}
-{% if auto_reload %} <meta http-equiv="refresh" content="30"> {% endif %}
+{% if auto_reload %} <meta http-equiv="refresh" content="60"> {% endif %}
 <script src="/media/js/bokeh.min.js"></script>
 <link rel="stylesheet" href="/media/css/bokeh.min.css">
 {{ script|safe }}
@@ -63,7 +63,7 @@
       Sideral time: {{ sid_time }}
    </h2>
 </div>
-<div style="float: left; margin-left: 10px;">
+<div style="float: left; margin-left: 30px;">
    <input value="Search..." id="SearchText" style="color:GrayText" 
           onchange="SearchText" 
           onfocus="javascript:this.value=''" 
@@ -73,6 +73,16 @@
 
                  <br><a href="add_object">Add Object</a>
 </div>
+<script>
+   var input = document.getElementById("SearchText");
+   input.addEventListener("keyup", function(event) {
+      event.preventDefault();
+      console.log(event.keyCode);
+      if (event.keyCode == 13) {
+         document.getElementById("searchbutton").click();
+      }
+   });
+</script>
 {% endblock %}
 {% block content %}
 <div id="content-main" style="width:570px;">
@@ -83,6 +93,9 @@
      <li><a href="javascript:void(0)" 
         class="tablink {% if selected_tab == 'skyplot' %} tab-selected{% endif %}"
              onclick="openTab(event,'skyplot')">Sky</a></li>
+     <li><a href="javascript:void(0)" 
+        class="tablink {% if selected_tab == 'HPWREN' %} tab-selected{% endif %}"
+             onclick="openTab(event,'HPWREN')">HPWREN</a></li>
    </ul>
    <div class="TabPanel" id="table" 
       {% if selected_tab != 'table' %}style="display:none;"{% endif %}>
@@ -104,7 +117,7 @@
             {% for obj in object_list %}
             <tr class="{% cycle 'row1' 'row2' %}">
                <td>{{ obj.srating|safe }}{% if obj.dark %}&nbsp;D{% endif %}</td>
-               <th><a href="{{ obj.id }}/" {% if new_window %} target="object_window" {% endif %}>{{ obj.name }}</a></th>
+               <th><a href="{{ obj.id }}/" {% if new_window %} target="object" {% endif %}>{{ obj.name }}</a></th>
                <td>{{ obj.hour_angle|format:"%.1f" }}</td>
                <td>{{ obj.altitude|format:"%.1f" }}</td>
                <td>{{ obj.settime }} </td>
@@ -122,6 +135,27 @@
       {% if selected_tab != 'skyplot' %}style="display:none;"{% endif %}>
       {{ div|safe }}
    </div>
+   <div class="TabPanel" id="HPWREN"
+      {% if selected_tab != 'HPWREN' %}style="display:none;"{% endif %}>
+      <table border=0>
+         <tr style="text-align: center;"><td colspan=2>
+            <img src="http://hpwren.ucsd.edu/cameras/L/wilson-n-mobo-m.jpg"
+                      width="250"><br></td>
+         </tr>
+         <tr><td>
+             <img src="http://hpwren.ucsd.edu/cameras/L/wilson-w-mobo-m.jpg"
+                  width="250"></td>
+            <td> <img src="http://hpwren.ucsd.edu/cameras/L/wilson-e-mobo-m.jpg"
+                      width="250"><br></td>
+         </tr>
+         <tr style="text-align:center;">
+            <td colspan=2><img src="http://hpwren.ucsd.edu/cameras/L/wilson-s-mobo-m.jpg"
+                     width="250"></td>
+            </tr>
+      </table>
+   </div>
+
+
 </div>
 <div id="content-related" style="margin-right: -25em;">
    <div class="module" id="tinfo">
