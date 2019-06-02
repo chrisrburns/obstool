@@ -2,8 +2,11 @@
 {% load myfilters %}
 {% block style %}
 {% if auto_reload %} <meta http-equiv="refresh" content="60"> {% endif %}
+<script src="/media/js/jquery-3.4.1.min.js"></script>
+<script src="/media/js/jquery.datetimepicker.full.js"></script>
 <script src="/media/js/bokeh.min.js"></script>
 <link rel="stylesheet" href="/media/css/bokeh.min.css">
+<link rel="stylesheet" href="/media/css/jquery.datetimepicker.css">
 {{ script|safe }}
 {{ script2|safe }}
 <script type="text/javascript">
@@ -96,6 +99,9 @@
      <li><a href="javascript:void(0)" 
         class="tablink {% if selected_tab == 'HPWREN' %} tab-selected{% endif %}"
              onclick="openTab(event,'HPWREN')">HPWREN</a></li>
+     <li><a href="javascript:void(0)" 
+        class="tablink {% if selected_tab == 'Weather' %} tab-selected{% endif %}"
+             onclick="openTab(event,'Weather')">Weather</a></li>
    </ul>
    <div class="TabPanel" id="table" 
       {% if selected_tab != 'table' %}style="display:none;"{% endif %}>
@@ -154,7 +160,14 @@
             </tr>
       </table>
    </div>
-
+   <div class="TabPanel" id="Weather"
+      {% if selected_tab != 'Weather' %}style="display:none;"{% endif %}>
+      <a href=http://www.cleardarksky.com/c/MtWilsonOBCAkey.html>
+      <img src="http://www.cleardarksky.com/c/MtWilsonOBCAcsk.gif?c=147617"
+          width=550></a>
+      <div style="width: 550px;"><iframe style="display: block;" src="https://cdnres.willyweather.com/widget/loadView.html?id=110329" width="550" height="520" frameborder="0"  scrolling="no"></iframe><a style="z-index: 1;margin: -20px 0 0 0;text-indent: -9999em;display: block;height: 20px;position: relative" href="https://www.willyweather.com/ca/los-angeles-county/mount-wilson.html" rel="nofollow">mount wilson Forecast</a></div>
+      </div>
+   </div>
 
 </div>
 <div id="content-related" style="margin-right: -25em;">
@@ -187,15 +200,6 @@
       </div>
    </div>
 
-   <div class="module" id="weather">
-      <h2>Cuurent Weather
-         <button style="float: right;" onclick="hide_section(this)">_</button>
-      </h2>
-      <div id=body style="display: {{ module_display.weather }};">
-         <iframe style="display: block;" src="https://cdnres.willyweather.com/widget/loadView.html?id=91502" width="200" height="228" frameborder="0" scrolling="no"></iframe><a style="text-indent: -9999em;z-index: 1;margin: -20px 0 0 0;display: block;height: 20px;position: relative" href="https://www.willyweather.com/ca/los-angeles-county/mount-wilson.html" rel="nofollow">mount wilson forecast</a>
-      </div>
-   </div>
-
    <form action="" method="post">{% csrf_token %}
      <div class="module" id="settings">
         <h2>Settings
@@ -204,7 +208,7 @@
         <div id=body style="display: {{ module_display.settings }};">
             Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
             <div style="text-align: center;">
-               <font size=-2>(yyyy-mm-dd hh:mm:ss)<br>Blank = now </font>
+               <font size=-2>(yyyy-mm-dd hh:mm)<br>Blank = now </font>
             </div><br>
             UTC offset: {{ form.tz_offset.errors }} {{ form.tz_offset }}<br>
             <div style="text-align: center;">
@@ -220,6 +224,13 @@
            <input type="submit" name='action' value="Reset">
         </div>
      </div>
+     <script>
+      $(function () {
+         $("#id_epoch").datetimepicker({
+            format: 'Y-m-d H:i',
+         });
+      });
+     </script>
      <div class="module" id="filters">
         <h2>Filters
            <button style="float: right;" onclick="hide_section(this)">_</button>

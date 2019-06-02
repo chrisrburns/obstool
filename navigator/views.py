@@ -78,8 +78,9 @@ class FilterForm(forms.Form):
                       widget=forms.CheckboxSelectMultiple)
    only_visible = forms.BooleanField(required=False, label='Only Visible')
    # Settings
-   epoch = forms.CharField(required=False, 
-         widget=forms.TextInput(attrs={'size':20}))
+   epoch = forms.DateTimeField(required=False, 
+         widget=forms.TextInput(attrs={'size':20}),
+         input_formats=['%Y-%m-%d %H:%M'])
    tz_offset = forms.FloatField(required=False, initial=0,
          widget=forms.TextInput(attrs={'size':'5'}))
                 
@@ -109,7 +110,8 @@ def get_current_time(request):
    epoch = None
    tz_offset = 0
    if 'object_list_form' in request.session:
-      epoch = request.session['object_list_form']['epoch'].encode('ascii','ignore')
+      #epoch = request.session['object_list_form']['epoch'].encode('ascii','ignore')
+      epoch = request.session['object_list_form']['epoch']
       tz_offset = float(request.session['object_list_form']['tz_offset'])
       if tz_offset is None:
          tz_offset = 0
