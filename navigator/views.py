@@ -177,7 +177,10 @@ def index(request):
       ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
       show_types = form.cleaned_data.get('show_types', ['All'])
       rating_low = form.cleaned_data.get('rating_low',None)
-      epoch = form.cleaned_data.get('epoch',None).encode('ascii','ignore')
+      epoch = form.cleaned_data.get('epoch',None)
+      if epoch is not None: 
+         if isinstance(epoch, basestring):
+            epoch = epoch.encode('ascii','ignore')
       tz_offset =form.cleaned_data.get('tz_offset', 0)
       new_window = form.cleaned_data.get('new_window',False)
       auto_reload = form.cleaned_data.get('auto_reload',False)
