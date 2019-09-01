@@ -16,19 +16,17 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic.base import TemplateView
+from django.views.static import serve
 from settings import MEDIA_ROOT,SITE_ROOT,BOKEH_JS,BOKEH_CSS
+import navigator.urls
 
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='main.html')),
     url(r'^index.html$', TemplateView.as_view(template_name='main.html')),
-    url(r'^navigator/', include('navigator.urls')),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^media/js/bokeh/(?P<path>.*)$', 'django.views.static.serve',
-       {'document_root':BOKEH_JS}),
-    url(r'^media/css/bokeh/(?P<path>.*)$', 'django.views.static.serve',
-       {'document_root':BOKEH_CSS}),
-    url(r'^media/(?P<path>.*)$', 'django.views.static.serve',
-       {'document_root':MEDIA_ROOT}),
-    url(r'(?P<path>.*)$', 'django.views.static.serve',
-               {'document_root':SITE_ROOT}),
+    url(r'^navigator/', include('navigator.urls', namespace='navigator')),
+    url(r'^admin/', admin.site.urls),
+    url(r'^media/js/bokeh/(?P<path>.*)$', serve, {'document_root':BOKEH_JS}),
+    url(r'^media/css/bokeh/(?P<path>.*)$', serve, {'document_root':BOKEH_CSS}),
+    url(r'^media/(?P<path>.*)$', serve, {'document_root':MEDIA_ROOT}),
+    url(r'(?P<path>.*)$', serve, {'document_root':SITE_ROOT}),
 ]
