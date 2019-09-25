@@ -1,4 +1,3 @@
-from django.template import Context, loader, RequestContext
 from django.db import models
 from django.db.models import F
 from django.core.exceptions import ObjectDoesNotExist
@@ -7,6 +6,7 @@ from navigator.models import Object,genMWO
 from django.http import HttpResponse,HttpResponseRedirect
 from django.views.decorators.csrf import csrf_protect
 from django import forms
+from django.shortcuts import render
 from obstool import settings
 import datetime
 #import plot_ams_phases,plot_ams_HA
@@ -243,8 +243,6 @@ def index(request):
    script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt, new_window=new_window)
    #alt_plot = plot_objs.plot_alt_map(obj_list, date=date, toff=tz_offset) 
-   t = loader.get_template('navigator/object_list.sortable.html')
-   #c = RequestContext(request, {
    c = {
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
@@ -254,7 +252,7 @@ def index(request):
       'module_display':module_display,
       'selected_tab':selected_tab,
       }
-   return HttpResponse(t.render(c))
+   return render(request, 'navigator/object_list.sortable.html', c)
 
 def mapview(request):
    only_visible = None
@@ -341,8 +339,6 @@ def mapview(request):
 
    script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt)
-   t = loader.get_template('navigator/object_map.html')
-   #c = RequestContext(request, {
    c = {
       'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
@@ -350,7 +346,7 @@ def mapview(request):
       'tel_az':tel_az,'sid_time':sid_time,'script':script, 'div':div,
       'module_display':module_display,
       }
-   return HttpResponse(t.render(c))
+   return render(request, 'navigator/object_map.html', c)
 
 def detail(request, object_id):
    obj = Object.objects.get(id=object_id)
@@ -420,7 +416,6 @@ def detail(request, object_id):
    if settings.FINDER_HIGH:
       extras += "high=%d&" % (settings.FINDER_HIGH)
    extras = extras[:-1]     # cleanup trailing & or ?
-   t = loader.get_template('navigator/object_detail.html')
 
    # Now deal with telescope position
    if tel_status == "SLEW":
@@ -460,7 +455,6 @@ def detail(request, object_id):
       dec_move = None
       tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
    script,div = plot_objs.plot_alt_map([obj], date=date, toff=tz_offset) 
-   #c = RequestContext(request, {
    c = {
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
@@ -472,7 +466,7 @@ def detail(request, object_id):
       'ra_move':ra_move, 'dec_move':dec_move, 'script':script, 'div':div,
       'delete_object':delete_object,
       }
-   return HttpResponse(t.render(c))
+   return render(request, 'navigator/object_detail.html', c)
 
 def search_name(request, object_name):
    error = None
@@ -489,12 +483,10 @@ def search_name(request, object_name):
    new_window = False
    if 'object_list_form' in request.session:
       new_window = request.session['object_list_form'].get('new_window', False)
-   t = loader.get_template('navigator/object_search.html')
-   #c = Context({
    c = {
       'objects':objs, 'message':message, 'error':error, 'new_window':new_window,
       }
-   return HttpResponse(t.render(c))
+   return render(request, 'navigator/object_search.html', c)
 
 def palette(low, high, reverse=None):
    dval = high-low
@@ -656,14 +648,6 @@ def add_object(request):
    else:
       form = AddObjectForm()
 
-   t = loader.get_template('navigator/add_object.html')
-   #c = RequestContext(request, {
    c = {
       'form':form, 'message':message, 'error':error, 'action':'add'}
-   return HttpResponse(t.render(c))
-
-
-
-
-
-
+   return render(request, 'navigator/add_object.html', c)

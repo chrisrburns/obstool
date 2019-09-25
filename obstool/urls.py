@@ -21,8 +21,8 @@ from settings import MEDIA_ROOT,SITE_ROOT,BOKEH_JS,BOKEH_CSS
 import navigator.urls
 
 urlpatterns = [
-    url(r'^$', TemplateView.as_view(template_name='main.html')),
     url(r'^index.html$', TemplateView.as_view(template_name='main.html')),
+    url(r'^$', TemplateView.as_view(template_name='main.html')),
     url(r'^navigator/', include('navigator.urls', namespace='navigator')),
     url(r'^admin/', admin.site.urls),
     url(r'^media/js/bokeh/(?P<path>.*)$', serve, {'document_root':BOKEH_JS}),
