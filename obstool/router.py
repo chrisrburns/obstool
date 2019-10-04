@@ -23,7 +23,7 @@ class MyAppRouter(object):
          return True
       return None
 
-   def allow_migrage(self, db, app_label, model_name=None, **hints):
+   def allow_migrate(self, db, app_label, model_name=None, **hints):
       if app_label == 'navigator':
          return db == 'objects'
       return None
