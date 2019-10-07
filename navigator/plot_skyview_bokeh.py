@@ -138,7 +138,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
 
    xypk = ColumnDataSource(dict(x=xs, y=ys, pk=pks))
    if new_window:
-      js_redirect = 'window.open("/navigator/"+pk+"/", "object");'
+      js_redirect = 'window.open("/navigator/"+pk+"/", "detailFrame");'
    else:
       js_redirect = 'window.location = "/navigator/"+pk+"/";'
 
