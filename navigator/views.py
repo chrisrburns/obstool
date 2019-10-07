@@ -148,6 +148,7 @@ def index(request):
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
    selected_tab = request.session.get('selected_tab', 'table')
+   selected_object = request.session.get('selected_object', '143')
    show_types = ['All']
    form = FilterForm()
 
@@ -246,7 +247,7 @@ def index(request):
    c = {
       'object_list': obj_list, 'form':form, 'date':sdate,
       'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
-      'auto_reload':auto_reload,
+      'auto_reload':auto_reload, 'selected_object':selected_object,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'script':script,'div':div,
       'module_display':module_display,
@@ -348,7 +349,7 @@ def mapview(request):
       }
    return render(request, 'navigator/object_map.html', c)
 
-def detail(request, object_id):
+def detail(request, object_id, view=None):
    obj = Object.objects.get(id=object_id)
    message = None
    error = None
@@ -359,6 +360,8 @@ def detail(request, object_id):
       tz_offset = float(request.session['object_list_form']['tz_offset'])
       if tz_offset is None:
          tz_offset = 0
+   if view == 'basic':
+      request.session['selected_object'] = object_id
 
    date = get_current_time(request)
    obj.epoch = date
@@ -466,7 +469,10 @@ def detail(request, object_id):
       'ra_move':ra_move, 'dec_move':dec_move, 'script':script, 'div':div,
       'delete_object':delete_object,
       }
-   return render(request, 'navigator/object_detail.html', c)
+   if view is None:
+      return render(request, 'navigator/object_detail.html', c)
+   else:
+      return render(request, 'navigator/object_basic.html', c)
 
 def search_name(request, object_name):
    error = None

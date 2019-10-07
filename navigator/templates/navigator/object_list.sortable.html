@@ -66,7 +66,7 @@
       Sideral time: {{ sid_time }}
    </h2>
 </div>
-<div style="float: left; margin-left: 30px;">
+<div style="float: left; margin-left: -180px;">
    <input value="Search..." id="SearchText" style="color:GrayText" 
           onchange="SearchText" 
           onfocus="javascript:this.value=''" 
@@ -123,7 +123,7 @@
             {% for obj in object_list %}
             <tr class="{% cycle 'row1' 'row2' %}">
                <td>{{ obj.srating|safe }}{% if obj.dark %}&nbsp;D{% endif %}</td>
-               <th><a href="{{ obj.id }}/" {% if new_window %} target="object" {% endif %}>{{ obj.name }}</a></th>
+               <th><a href="{{ obj.id }}/basic" {% if new_window %} target="detailFrame" {% endif %}>{{ obj.name }}</a></th>
                <td>{{ obj.hour_angle|format:"%.1f" }}</td>
                <td>{{ obj.altitude|format:"%.1f" }}</td>
                <td>{{ obj.settime }} </td>
@@ -165,12 +165,19 @@
       <a href=http://www.cleardarksky.com/c/MtWilsonOBCAkey.html>
       <img src="http://www.cleardarksky.com/c/MtWilsonOBCAcsk.gif?c=147617"
           width=550></a>
-      <div style="width: 550px;"><iframe style="display: block;" src="https://cdnres.willyweather.com/widget/loadView.html?id=110329" width="550" height="520" frameborder="0"  scrolling="no"></iframe><a style="z-index: 1;margin: -20px 0 0 0;text-indent: -9999em;display: block;height: 20px;position: relative" href="https://www.willyweather.com/ca/los-angeles-county/mount-wilson.html" rel="nofollow">mount wilson Forecast</a></div>
+      <div style="width: 550px;">
+         <iframe style="display: block;" 
+            src="https://cdnres.willyweather.com/widget/loadView.html?id=110329"
+            width="550" height="520" frameborder="0"  scrolling="no">
+         </iframe>
+         <a style="z-index: 1;margin: -20px 0 0 0;text-indent: -9999em;display: block;height: 20px;position: relative" href="https://www.willyweather.com/ca/los-angeles-county/mount-wilson.html" rel="nofollow">mount wilson Forecast</a></div>
       </div>
    </div>
 
 </div>
-<div id="content-related" style="margin-right: -25em;">
+<iframe height=1200 width=620 src="/navigator/{{ selected_object }}/basic" name="detailFrame"
+   scrolling="no" style="border: 0px; display:block; float:left;"></iframe>
+<div id="content-related">
    <div class="module" id="tinfo">
       <h2>Telescope Position
          <button style="float: right;" onclick="hide_section(this)">_</button>

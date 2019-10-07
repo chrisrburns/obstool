@@ -10,5 +10,6 @@ urlpatterns = [
      url(r'update_session', views.update_session),
      url(r'update_rating', views.update_rating),
      url(r'^(?P<object_id>\d+)/$', views.detail, name='detail'),
+     url(r'^(?P<object_id>\d+)/(?P<view>basic)$', views.detail, name='basic'),
      url(r'^(?P<objectid>\d+)/finder$', views.finder, name='finder'),
 ]

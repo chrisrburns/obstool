@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% load myfilters %}
+{% block style %}
+  <script src="/media/js/bokeh/bokeh.min.js"></script>
+  <link rel="stylesheet" href="/media/css/bokeh/bokeh.min.css">
+  {{ script|safe }}
+  <link rel="stylesheet" href="/media/css/rating.css">
+  <script src="/media/js/sorttable.js"></script>
+  <script type="text/javascript" src="/media/js/paper.js"></script>
+  <script type="text/javascript" src="/media/js/telescope.js"></script>
+  <script type="text/javascript">
+     function update_rating(value) {
+        xhttp = new XMLHttpRequest();
+        getstr = "../update_rating";
+        sendstr = "csrfmiddlewaretoken={{ csrf_token }}&obj={{ object.id }}&rating="+value;
+        xhttp.open("POST", getstr, true);
+        xhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        xhttp.send(sendstr);
+     }
+  </script>
+  <script type="text/javascript">
+     window.onload = function() {
+        paper.setup('myCanvas');
+        azDome = draw_dome(0.9, 0.2, {{ object.altitude }}, 
+              {{ object.azimuth }});
+        view.draw();
+     }
+  </script>
+{% endblock %}
+
+{% block pretitle %} 
+  <h2> {{ object.name }} </h2> 
+{% endblock %}
+{% block content %}
+  <div id="content-main" style="width:230px;float: left;">
+    <h1> RA:  {{ object.PrecRAh }}<br>
+         DEC: {{ object.PrecDecd }}<br>
+         HA: {{ object.hour_angle|format:"%.1f" }} hr<br>
+         AZ:  {{ object.azimuth|format:"%.2f" }}&deg;<br>
+         ALT:  {{ object.altitude|format:"%.2f" }}&deg;<br>
+    </h1>
+    <P>
+    <div class="module" id="canvas">
+       <canvas id="myCanvas" width=150 height=275></canvas>
+    </div>
+    <form action="" method="post">{% csrf_token %}
+       {% if tel_status == "SLEW" %}
+       <font color='red'>{{ az_move }}</font><br>
+       <font color='red'>{{ ra_move }}</font><br>
+       <font color='red'>{{ dec_move }}</font><br>
+          <input type='submit' name='action' value='Sync'>
+          <input type='submit' name='action' value='Cancel'>
+       {% else %}
+          <input type='submit' name='action' value='GOTO'>
+       {% endif %}
+    </form>
+    <form action="" method="post">{% csrf_token %}
+    <table cellspacing="0" border=0 style="table-layout: fixed; width: 100%;">
+       <tr><td width=75>Description:</td><td> {{ object.descr }}</td></tr>
+       <tr><td>Type:</td><td> {{ object.objtype }}</td></tr>
+       <tr><td>RA/DEC<br>(J2000): </td><td> {{ object.RA|angle2hms }} <br>
+                                        {{ object.DEC|angle2dms }} </td></tr>
+       <tr><td>Size: </td><td> {{ object.ssize }} </td></tr>
+       <tr><td>Vmag: </td><td> {{ object.sMv }} </td></tr>
+       <tr><td>Distance: </td><td> {{ object.sdistance }} </td></tr>
+       <tr><td>Dark Sky?: </td><td> {% if obj.dark %}D{% endif %} </td></tr>
+       <tr><td>Rating: </td><td> 
+        <span class="starRating">
+          <input id="rating5" type="radio" name="rating" value="5"
+                 {% if object.rating == 5 %}checked{% endif %}
+                 onclick="update_rating(5)">
+          <label for="rating5">5</label>
+          <input id="rating4" type="radio" name="rating" value="4"
+                 {% if object.rating == 4 %}checked{% endif %}
+                 onclick="update_rating(4)">
+          <label for="rating4">4</label>
+          <input id="rating3" type="radio" name="rating" value="3"
+                 {% if object.rating == 3 %}checked{% endif %}
+                 onclick="update_rating(3)">
+          <label for="rating3">3</label>
+          <input id="rating2" type="radio" name="rating" value="2"
+                 {% if object.rating == 2 %}checked{% endif%}
+                 onclick="update_rating(2)">
+          <label for="rating2">2</label>
+          <input id="rating1" type="radio" name="rating" value="1"
+                 {% if object.rating == 1 %}checked{% endif %}
+                 onclick="update_rating(1)">
+                 <label for="rating1">1</label>
+        </span>
+        </td>
+       </tr>
+       <tr><td colspan=2>
+             Notes: <br>
+             <textarea rows=10 cols=33 name="comments">{{ object.comments }}</textarea><br>
+             {% if delete_object == "confirm" %}
+                <input type="submit" name="action" value="Cancel">
+                <input type="submit" name="action" value="Confirm" style="color: red;"> Are you sure you want to delete?
+             {% else %}
+                <input type="submit" name="action" value="Update">
+                <input type="submit" name="action" value="Delete">
+             {% endif %}
+       </td></tr>
+    </table>
+    </form>
+    <br>
+    {% if message %}
+       <div style="background: #eeffcc;"> 
+          <img src="/media/img/admin/icon_success.gif"> 
+             &nbsp;&nbsp;{{ message }} 
+       </div>
+    {% endif %}
+    {% if error %}
+      <div style="background: red; color: white;">
+        <img src="/media/img/admin/icon_alert.gif"> 
+          &nbsp;&nbsp; {{ error }} 
+      </div>
+    {% endif %}
+  </div>
+  <div style="padding: 10px 0px 0px 0px; width:300px; float:left;">
+     {{ div|safe }}
+     <a href="finder" target="_blank">
+        <img style="padding: 0px 0px 0px 40px;" src="finder{{extras}}" width=250>
+     </a>
+     <div style="padding: 0px 0px 0px 40px;margin-top: -10px">
+        <br><font size=-2>{{ finder_size }}X{{ finder_size }} 
+           arc-minutes.<br>Orientation: {{ finder_orientation }}</font>
+        <form action="" method="post">{% csrf_token %}
+           {% for key,value in eyepieces.items %}
+              <input type='submit' name='eyepiece' 
+                 value="{{ key }}"
+                 {%if cur_eyepiece == key %} disabled {% endif %}
+                 >
+           {% endfor %}
+        </form>
+     </div>
+  </div>
+  <!-- <div id="content-related" style="margin-right: -25em;">
+    <div class="module" id="tinfo">
+       <h2>Telescope Position</h2>
+       <table border=0>
+          <tr>
+             <td>RA:</td><td> {{ tel_RA }} </td>
+          </tr>
+          <tr>
+             <td>DEC:</td><td> {{ tel_DEC }} </td>
+          </tr>
+          <tr>
+             <td>HA:</td><td> {{ tel_ha }} </td>
+          </tr>
+          <tr>
+             <td>Alt:</td><td> {{ tel_alt }}&deg; </td>
+          </tr>
+          <tr>
+             <td>Az:</td><td> {{ tel_az }}&deg;</td>
+          </tr>
+       </table>
+       <br>
+    </div>
+  </div> -->
+{% endblock %}
