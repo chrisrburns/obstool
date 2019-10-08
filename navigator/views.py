@@ -549,7 +549,7 @@ def finder(request, objectid):
          tz_offset = float(request.session['object_list_form']['tz_offset'])
          if tz_offset is None:
             tz_offset = 0
-         if not epoch:
+         if not epoch or epoch == 'None':
             date = ephem.now()
          else:
             date = ephem.Date(ephem.Date(epoch) - tz_offset*ephem.hour)
