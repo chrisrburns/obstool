@@ -175,7 +175,7 @@
    </div>
 
 </div>
-<iframe height=1200 width=620 src="/navigator/{{ selected_object }}/basic" name="detailFrame"
+<iframe height=1200 width=580 src="/navigator/{{ selected_object }}/basic" name="detailFrame"
    scrolling="no" style="border: 0px; display:block; float:left;"></iframe>
 <div id="content-related">
    <div class="module" id="tinfo">
@@ -217,6 +217,11 @@
             <div style="text-align: center;">
                <font size=-2>(yyyy-mm-dd hh:mm)<br>Blank = now </font>
             </div><br>
+            <center>
+            <input type="submit" name="action" value="-1h">
+            <input type="submit" name="action" value="-30m">
+            <input type="submit" name="action" value="+30m">
+            <input type="submit" name="action" value="+1h"></center><br>
             UTC offset: {{ form.tz_offset.errors }} {{ form.tz_offset }}<br>
             <div style="text-align: center;">
                <font size=-2>PDT = -7<br>

@@ -6,7 +6,7 @@
     {% block style %}{% endblock %}
     <meta name="robots" content="NONE,NOARCHIVE" />
   </head>
-  <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+  <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}" {% block bodytags %}{% endblock %}>
 
     <!-- Container -->
     <div id="container">
