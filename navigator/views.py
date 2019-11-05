@@ -202,18 +202,18 @@ def index(request):
    sid_time = str(obs.sidereal_time())
    # Let's be a little smarter here. If we are imposing telescope limits
    # or an hour-angle limit, that will cut down on objects
-   sql = 'SELECT * from navigator_object'
+   sql = 'SELECT *, CASE WHEN RA-%s < -180 THEN RA-%s+360 WHEN RA-%s > 180 THEN RA-%s - 360 ELSE RA-%s END as HA from navigator_object'
    RAoffset = obs.sidereal_time()*180/pi    # Now in degrees
+   l = [RAoffset]*5
    if (only_visible is not None and only_visible):
-      sql += " WHERE (RA-%s > %s AND RA-%s < %s AND DEC > %s) or objtype = 'SS'"
-      l = [RAoffset, -settings.HA_LIMIT*15, RAoffset, settings.HA_LIMIT*15,
-            settings.DEC_LIMIT]
+      sql += " WHERE ( abs(HA) < %s AND DEC > %s) or objtype = 'SS'"
+      l += [settings.HA_LIMIT*15, settings.DEC_LIMIT]
    elif ha_high is not None:
-      sql += " WHERE (RA-%s > %s AND RA-%s < %s) OR objtype = 'SS'"
-      l = [RAoffset, -ha_high*15, RAoffset, ha_high*15]
+      sql += " WHERE (abs(HA) < %s and DEC > %s)  OR objtype = 'SS'"
+      l += [ha_high*15, settings.DEC_LIMIT]
    else:
-      sql += " WHERE (RA-%s > -90 AND RA-%s < 90) OR DEC > %s OR objtype = 'SS'"
-      l = [RAoffset, RAoffset, 90-obs.lat*180/pi]
+      sql += " WHERE (abs(HA) < 90 and DEC > %s) OR objtype = 'SS'"
+      l += [settings.DEC_LIMIT]
 
    if rating_low is not None:
       sql += " AND rating >= %s"
