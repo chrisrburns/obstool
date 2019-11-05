@@ -645,7 +645,7 @@ table#change-history tbody th {
 #container {
     position: relative;
     width: 100%;
-    min-width: 1124px;
+    min-width: 1500px;
     padding: 0;
 }
 
