@@ -15,6 +15,9 @@ import os
 
 # Find Bokeh
 import bokeh
+from astropy.utils.iers import conf as iers_conf
+iers_conf.auto_download = False
+
 BOKEH_JS = os.path.join(os.path.dirname(bokeh.__file__),'server','static','js')
 BOKEH_CSS = os.path.join(os.path.dirname(bokeh.__file__),'server','static','css')
 # Here are some site-wide configuration settings that can be changed 
