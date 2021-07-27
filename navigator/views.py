@@ -64,6 +64,44 @@ TYPE_CHOICES = (
       ('OCs','OCs'),
       ('QSOs','QSOs'))
 
+def tzoffset(date, utc=True):
+   '''Given a date (ephem Date), figure out if it's US PST or PDT and return
+   correct offset. If utc is True, date is UTC, otherwise local time'''
+   dt = date.datetime()
+   if dt.month in [1,2,12]:
+      # Definitely PST
+      return -8
+   if dt.month in [4,5,6,7,8,9,10]:
+      # Definitely PDT
+      return -7
+
+   year = dt.year
+   # More work
+   if dt.month == 3:
+      # PDT stars 2nd Sunday
+      first_day = datetime.datetime(year, 3, 1, 1, 0, 0).isoweekday()
+      sec_sun = 7 + (8-first_day)
+      # PDT stars 10:00 UT or 2:00 PST, which is ambiguous
+      if utc:
+         pdt_start = datetime.datetime(year, 3, sec_sun, 10, 0, 0)
+      else:
+         pdt_start = datetime.datetime(year, 3, sec_sun, 2, 0, 0)
+      if dt < pdt_start:
+         return -8
+      return -7
+
+   # November
+   first_day = datetime.datetime(year, 11, 1, 1, 0, 0),isoweekday()
+   first_sun = 8 - first_day
+   # PST starts 09:00 UT or 2:00 am PDT, which is ambiguous
+   if utc:
+      pst_start = datetime.datetime(year, 11, first_sun, 9, 0, 0)
+   else:
+      pst_start = datetime.datetime(year, 11, first_sun, 2, 0, 0)
+   if dt < pst_star:
+      return -7
+   return -8
+
 
 class FilterForm(forms.Form):
    ha_high = forms.FloatField(min_value=0.0, required=False,
@@ -80,11 +118,9 @@ class FilterForm(forms.Form):
    # Settings
    epoch = forms.DateTimeField(required=False, 
          widget=forms.TextInput(attrs={'size':20}),
-         input_formats=['%Y-%m-%d %H:%M'])
-   tz_offset = forms.FloatField(required=False, initial=0,
-         widget=forms.TextInput(attrs={'size':'5'}))
+         input_formats=['%Y-%m-%d %H:%M','%Y-%m-%d %H:%M:%S'])
                 
-   new_window = forms.BooleanField(required=False, initial=False)
+   #new_window = forms.BooleanField(required=False, initial=False)
    auto_reload = forms.BooleanField(required=False, initial=True)
 
 class AddObjectForm(forms.Form):
@@ -106,21 +142,20 @@ class AddObjectForm(forms.Form):
 
 
 def get_current_time(request):
-   '''Get the current time. This could be 'now' or stored in the session'''
+   '''Get the current time. This could be 'now' or stored in the session.
+   Return as an ephem date object, so in UTC'''
    epoch = None
-   tz_offset = 0
    if 'object_list_form' in request.session:
-      #epoch = request.session['object_list_form']['epoch'].encode('ascii','ignore')
       epoch = request.session['object_list_form']['epoch']
-      tz_offset = float(request.session['object_list_form']['tz_offset'])
-      if tz_offset is None:
-         tz_offset = 0
       if not epoch:
          date = ephem.now()
       else:
-         date = ephem.Date(epoch) - tz_offset*ephem.hour
+         # Assumed to be in localtime
+         date = ephem.Date(epoch)
+         date = ephem.Date(date - tzoffset(date)*ephem.hour)
    else:
       date = ephem.now()
+   date = date
 
    return date
 
@@ -141,9 +176,8 @@ def index(request):
    ha_high = settings.HA_SOFT_LIMIT
    epoch = None
    rating_low = None
-   new_window = False
+   new_window = True
    auto_reload = True
-   tz_offset = 0
    #Default:  nothing posted and no session info
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
@@ -152,25 +186,37 @@ def index(request):
    show_types = ['All']
    form = FilterForm()
 
+   deltat = 0
+
    if request.method == "POST":
-      if request.POST.get('action','') == 'Update':
-         form = FilterForm(request.POST)
-         # save this form info into the session cache
-         if form.is_valid():
-            request.session['object_list_form'] = form.cleaned_data.copy()
-         #newd = {}
-         #newd.update(request.POST)
-         #newd['show_types'] = request.POST.get('show_types')
-         #request.session['object_list_form'] = newd
-      elif request.POST.get('action','') == 'Park':
-         request.session['cur_tel_obj'] = 'Park'
-         cur_tel_obj = 'Park'
-      else:
-         # The reset button was called
+      if request.POST.get('action','') == "Reset":
          form = FilterForm()
          if 'object_list_form' in request.session:
             del request.session['object_list_form']
-   if 'object_list_form' in request.session:
+      elif request.POST.get('action','') == "Park":
+         request.session['cur_tel_obj'] = 'Park'
+         cur_tel_obj = 'Park'
+         selected_object = '143'
+      else:
+         # Any other button
+         form = FilterForm(request.POST)
+         if form.is_valid():
+            request.session['object_list_form'] = form.cleaned_data.copy()
+
+
+      if request.POST.get('action','') == '-1h':
+         # decrease time by 1h
+         deltat = -1*ephem.hour
+      elif request.POST.get('action','') == '-30m':
+         # decrease time by 30m
+         deltat = -0.5*ephem.hour
+      elif request.POST.get('action','') == '+30m':
+         # increase time by 30m
+         deltat = 0.5*ephem.hour
+      elif request.POST.get('action','') == '+1h':
+         # increase time by 1h
+         deltat = 1*ephem.hour
+   elif 'object_list_form' in request.session:
       form = FilterForm(request.session['object_list_form'])
 
    if form.is_valid():
@@ -182,16 +228,23 @@ def index(request):
       if epoch is not None: 
          if isinstance(epoch, basestring):
             epoch = epoch.encode('ascii','ignore')
-      tz_offset =form.cleaned_data.get('tz_offset', 0)
-      new_window = form.cleaned_data.get('new_window',False)
       auto_reload = form.cleaned_data.get('auto_reload',False)
 
-   if tz_offset is None:
-      tz_offset = 0
    if epoch:
-      date = ephem.Date(ephem.Date(epoch) - tz_offset*ephem.hour)
+      # assumed to be in local time
+      date = ephem.Date(ephem.Date(epoch))
+      date = ephem.Date(date - tzoffset(date)*ephem.hour)
+      #form.fields['epoch'].initial = str(date).replace('/','-')
    else:
       date = ephem.now()
+
+   if deltat != 0:
+      date = ephem.Date(date + deltat)
+      ldate = ephem.Date(date + tzoffset(date)*ephem.hour)
+      if 'object_list_form' in request.session:
+         # Update the form so that the local time "sticks"
+         request.session['object_list_form']['epoch'] = ldate.datetime()
+         form = FilterForm(request.session['object_list_form'])
 
    # Now deal with telescope position
    tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
@@ -206,18 +259,19 @@ def index(request):
    RAoffset = obs.sidereal_time()*180/pi    # Now in degrees
    l = [RAoffset]*5
    if (only_visible is not None and only_visible):
-      sql += " WHERE ( abs(HA) < %s AND DEC > %s) or objtype = 'SS'"
+      sql += " WHERE ( abs(HA) < %s AND DEC > %s)"
       l += [settings.HA_LIMIT*15, settings.DEC_LIMIT]
    elif ha_high is not None:
-      sql += " WHERE (abs(HA) < %s and DEC > %s)  OR objtype = 'SS'"
+      sql += " WHERE (abs(HA) < %s and DEC > %s)"
       l += [ha_high*15, settings.DEC_LIMIT]
    else:
-      sql += " WHERE (abs(HA) < 90 and DEC > %s) OR objtype = 'SS'"
+      sql += " WHERE (abs(HA) < 90 and DEC > %s)"
       l += [settings.DEC_LIMIT]
 
    if rating_low is not None:
       sql += " AND rating >= %s"
       l.append(rating_low)
+   sql += " OR objtype = 'SS'"
    obj_list = Object.objects.raw(sql, l)
 
    if show_types is not None:
@@ -234,19 +288,15 @@ def index(request):
       newlist.append(obj)
    obj_list = newlist
 
-   sdate = ephem.Date(date+tz_offset*ephem.hour)
+   sdate = ephem.Date(date+tzoffset(date)*ephem.hour)
    sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
-   if tz_offset != 0:
-      stz_offset = "%.1f" % (tz_offset)
-   else:
-      stz_offset = ""
+   stz_offset = "%.1f" % (tzoffset(date))
 
    script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
-         tel_az=tel_az, tel_alt=tel_alt, new_window=new_window)
-   #alt_plot = plot_objs.plot_alt_map(obj_list, date=date, toff=tz_offset) 
+         tel_az=tel_az, tel_alt=tel_alt, new_window=True)
    c = {
       'object_list': obj_list, 'form':form, 'date':sdate,
-      'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
+      'method':request.method, 'new_window':True, 'tz_offset':stz_offset,
       'auto_reload':auto_reload, 'selected_object':selected_object,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'script':script,'div':div,
@@ -260,8 +310,7 @@ def mapview(request):
    ha_high = settings.HA_SOFT_LIMIT
    epoch = None
    rating_low = None
-   new_window = False
-   tz_offset = 0
+   new_window = True
    #Default:  nothing posted and no session info
    cur_tel_obj = request.session.get('cur_tel_obj', 'Park')
    prev_tel_obj = request.session.get('prev_tel_obj', 'Park')
@@ -290,13 +339,10 @@ def mapview(request):
       show_types = form.cleaned_data.get('show_types', None)
       rating_low = form.cleaned_data.get('rating_low',None)
       epoch = form.cleaned_data.get('epoch',None)
-      tz_offset =form.cleaned_data.get('tz_offset', 0)
-      new_window = form.cleaned_data.get('new_window',False)
 
-   if tz_offset is None:
-      tz_offset = 0
    if epoch:  
-      date = ephem.Date(epoch) - tz_offset*ephem.hour
+      date = ephem.Date(epoch)
+      date = ephem.Date(date - tzoffset(date)*ephem.hour)
    else:
       date = ephem.now()
 
@@ -330,19 +376,17 @@ def mapview(request):
 
    if epoch:
       sdate = epoch.strftime('%m/%d/%y %H:%M:%S')
+      stz_offset = "%.1f" % (tzoffset(ephem.Date(epoch), utc=False))
    else:
-      sdate = ephem.Date(ephem.now()+tz_offset*ephem.hour)
+      sdate = ephem.Date(ephem.now()+tzoffset(ephem.now())*ephem.hour)
       sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
-   if tz_offset != 0:
-      stz_offset = "%.1f" % (tz_offset)
-   else:
-      stz_offset = ""
+      stz_offset = "%.1f" % (tzoffset(ephem.now()))
 
    script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt)
    c = {
       'form':form, 'date':sdate,
-      'method':request.method, 'new_window':new_window, 'tz_offset':stz_offset,
+      'method':request.method, 'new_window':True, 'tz_offset':stz_offset,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'script':script, 'div':div,
       'module_display':module_display,
@@ -355,11 +399,6 @@ def detail(request, object_id, view=None):
    error = None
    extras = "?"
    epoch = None
-   tz_offset = 0
-   if 'object_list_form' in request.session:
-      tz_offset = float(request.session['object_list_form']['tz_offset'])
-      if tz_offset is None:
-         tz_offset = 0
    if view == 'basic':
       request.session['selected_object'] = object_id
 
@@ -457,7 +496,7 @@ def detail(request, object_id, view=None):
       ra_move = None
       dec_move = None
       tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
-   script,div = plot_objs.plot_alt_map([obj], date=date, toff=tz_offset) 
+   script,div = plot_objs.plot_alt_map([obj], date=date, toff=tzoffset(date)) 
    c = {
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
@@ -486,9 +525,9 @@ def search_name(request, object_name):
    else:
       message = "Found %d objects matching your pattern" % len(objs)
 
-   new_window = False
-   if 'object_list_form' in request.session:
-      new_window = request.session['object_list_form'].get('new_window', False)
+   new_window = True
+   #if 'object_list_form' in request.session:
+   #   new_window = request.session['object_list_form'].get('new_window', False)
    c = {
       'objects':objs, 'message':message, 'error':error, 'new_window':new_window,
       }
@@ -546,13 +585,11 @@ def finder(request, objectid):
    if obj.objtype == 'SS':
       if 'object_list_form' in request.session:
          epoch = str(request.session['object_list_form']['epoch'])
-         tz_offset = float(request.session['object_list_form']['tz_offset'])
-         if tz_offset is None:
-            tz_offset = 0
          if not epoch or epoch == 'None':
             date = ephem.now()
          else:
-            date = ephem.Date(ephem.Date(epoch) - tz_offset*ephem.hour)
+            date = ephem.Date(ephem.Date(epoch))
+            date = ephem.Date(date - tzoffset(date)*ephem.hour)
       else:
          date = ephem.now()
       content = get_planets.get_image(obj.name, date, size)

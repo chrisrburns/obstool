@@ -222,13 +222,9 @@
             <input type="submit" name="action" value="-30m">
             <input type="submit" name="action" value="+30m">
             <input type="submit" name="action" value="+1h"></center><br>
-            UTC offset: {{ form.tz_offset.errors }} {{ form.tz_offset }}<br>
-            <div style="text-align: center;">
-               <font size=-2>PDT = -7<br>
-                             PST = -8</font>
-            </div><br>
-            {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
             <br>
+            <!-- {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
+            <br> -->
             {{ form.auto_reload.errors }} {{ form.auto_reload }} Refresh Automatically
             <br>
   
