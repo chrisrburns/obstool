@@ -59,3 +59,6 @@ if [ ! -d "$NGINX_SITES_CONFIG" ] ; then
    mkdir -p "$NGINX_SITES_CONFIG"
 fi
 ln -sf $ROOT_PATH/$NGINX_CONFIG_FILE $NGINX_SITES_CONFIG
+bokeh_loc=$(python -c "import bokeh;print(bokeh.__file__)")
+jsdir=$(dirname $bokeh_loc)/server/static/js
+ln -s $jsdir $ROOT_PATH/media/js/bokeh

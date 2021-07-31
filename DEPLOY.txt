@@ -1,0 +1,19 @@
+Some notes on deploying as a web service.
+
+1) Install nginx
+
+   Easiest I found was simply 'brew install nginx'
+
+2) Install uwsgi
+
+   This was a pain on Big Sur. Here's what worked:
+
+   conda install clang
+   export CFLAGS="-I/Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk/usr/include"
+   export LDFLAGS="-L/Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk/usr/lib -iframework /Library/Developer/CommandLineTools/SDKs/MacOSX11.3.sdk/System/Library/Frameworks"
+
+   pip install uwsgi
+
+3) run deploy.sh in this folder
+
+4) run start.sh/stop.sh
