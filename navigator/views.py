@@ -241,9 +241,14 @@ def index(request):
    if deltat != 0:
       date = ephem.Date(date + deltat)
       ldate = ephem.Date(date + tzoffset(date)*ephem.hour)
+      dt = ldate.datetime()
+
       if 'object_list_form' in request.session:
          # Update the form so that the local time "sticks"
-         request.session['object_list_form']['epoch'] = ldate.datetime()
+         # Need to do this because we need integer seconds (no microseconds)
+         request.session['object_list_form']['epoch'] = \
+               datetime.datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute,
+                     dt.second)
          form = FilterForm(request.session['object_list_form'])
 
    # Now deal with telescope position
