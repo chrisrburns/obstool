@@ -2,7 +2,8 @@
 
 ROOT_PATH=`pwd`
 NGINX_CONFIG_FILE=obstool_nginx.conf
-NGINX_SITES_CONFIG=/usr/local/etc/nginx/servers
+#NGINX_SITES_CONFIG=/usr/local/etc/nginx/servers
+NGINX_SITES_CONFIG=/opt/homebrew/etc/nginx/servers
 UWSGI_CONFIG_FILE=obstool_uwsgi.ini
 
 echo """
@@ -54,7 +55,7 @@ pidfile = /tmp/obstool.pid
 daemonize = uwsgi.log
 """ > $UWSGI_CONFIG_FILE
 
-if [ ! -d "$NGINX_SITES_CONFIG"] ; then
-   sudo mkdir -p "$NGINX_SITES_CONFIG"
+if [ ! -d "$NGINX_SITES_CONFIG" ] ; then
+   mkdir -p "$NGINX_SITES_CONFIG"
 fi
 ln -sf $ROOT_PATH/$NGINX_CONFIG_FILE $NGINX_SITES_CONFIG
