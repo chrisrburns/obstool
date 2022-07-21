@@ -1,15 +1,14 @@
-from django.conf.urls import url
-
+from django.urls import re_path
 from . import views
 
 urlpatterns = [
-     url(r'^$', views.index, name='index'),
-     url(r'^add_object$', views.add_object, name='index'),
-     url(r'^skymap$', views.mapview),
-     url(r'^search/(?P<object_name>.+)$', views.search_name),
-     url(r'update_session', views.update_session),
-     url(r'update_rating', views.update_rating),
-     url(r'^(?P<object_id>\d+)/$', views.detail, name='detail'),
-     url(r'^(?P<object_id>\d+)/(?P<view>basic)$', views.detail, name='basic'),
-     url(r'^(?P<objectid>\d+)/finder$', views.finder, name='finder'),
+     re_path(r'^$', views.index, name='index'),
+     re_path(r'^add_object$', views.add_object, name='index'),
+     re_path(r'^skymap$', views.mapview),
+     re_path(r'^search/(?P<object_name>.+)$', views.search_name),
+     re_path(r'update_session', views.update_session),
+     re_path(r'update_rating', views.update_rating),
+     re_path(r'^(?P<object_id>\d+)/$', views.detail, name='detail'),
+     re_path(r'^(?P<object_id>\d+)/(?P<view>basic)$',views.detail,name='basic'),
+     re_path(r'^(?P<objectid>\d+)/finder$', views.finder, name='finder'),
 ]

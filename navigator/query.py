@@ -4,7 +4,7 @@ and extract useful info'''
 from astropy.utils.data import get_readable_fileobj
 from astropy.table import Table
 import urllib
-import cStringIO
+from io import BytesIO
 from PIL import Image
 
 NED_NAME_QUERY = "http://ned.ipac.caltech.edu/cgi-bin/objsearch?objname=%s&extend=no&hconst=73&omegam=0.27&omegav=0.73&corr_z=1&out_csys=Equatorial&out_equinox=J2000.0&obj_sort=RA+or+Longitude&of=%s&zv_breaker=30000.1&list_limit=5&img_stamp=NO"
@@ -30,13 +30,13 @@ poss_url = "http://archive.stsci.edu/cgi-bin/dss_search?v=poss2ukstu_red&r=%f&d=
 
 def get_image(ra, dec):
    u = urllib.urlopen(poss_url % (ra,dec))
-   f = cStringIO.StringIO(u.read())
+   f = BytesIO(u.read())
    u.close()
    im = Image.open(f)
    #f.close()
    x,y = im.size
    im2 = im.resize((x/2,y/2))
-   f2 = cStringIO.StringIO()
+   f2 = BytesIO()
    im2.save(f2, format='PNG')
    f.close()
    retstring = f2.getvalue()

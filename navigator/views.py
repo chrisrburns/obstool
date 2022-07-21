@@ -9,10 +9,12 @@ from django import forms
 from django.shortcuts import render
 from obstool import settings
 import datetime
+from zoneinfo import ZoneInfo
+zone = ZoneInfo(settings.TIME_ZONE)
 #import plot_ams_phases,plot_ams_HA
-import plot_skyview_bokeh as plot_skyview
-import plot_objs_bokeh as plot_objs
-import StringIO
+from . import plot_skyview_bokeh as plot_skyview
+from . import plot_objs_bokeh as plot_objs
+from io import BytesIO
 #import Image, ImageDraw
 from PIL import Image,ImageDraw
 from numpy import argsort,mean
@@ -21,9 +23,9 @@ try:
 except:
    import ephem
 from math import pi
-import get_planets
-import utils
-import query
+from . import get_planets
+from . import utils
+from . import query
 
 def type_included(typ, show_types):
    if 'All' in show_types:
@@ -64,44 +66,47 @@ TYPE_CHOICES = (
       ('OCs','OCs'),
       ('QSOs','QSOs'))
 
-def tzoffset(date, utc=True):
-   '''Given a date (ephem Date), figure out if it's US PST or PDT and return
-   correct offset. If utc is True, date is UTC, otherwise local time'''
-   dt = date.datetime()
-   if dt.month in [1,2,12]:
-      # Definitely PST
-      return -8
-   if dt.month in [4,5,6,7,8,9,10]:
-      # Definitely PDT
-      return -7
-
-   year = dt.year
-   # More work
-   if dt.month == 3:
-      # PDT stars 2nd Sunday
-      first_day = datetime.datetime(year, 3, 1, 1, 0, 0).isoweekday()
-      sec_sun = 7 + (8-first_day)
-      # PDT stars 10:00 UT or 2:00 PST, which is ambiguous
-      if utc:
-         pdt_start = datetime.datetime(year, 3, sec_sun, 10, 0, 0)
-      else:
-         pdt_start = datetime.datetime(year, 3, sec_sun, 2, 0, 0)
-      if dt < pdt_start:
-         return -8
-      return -7
-
-   # November
-   first_day = datetime.datetime(year, 11, 1, 1, 0, 0),isoweekday()
-   first_sun = 8 - first_day
-   # PST starts 09:00 UT or 2:00 am PDT, which is ambiguous
-   if utc:
-      pst_start = datetime.datetime(year, 11, first_sun, 9, 0, 0)
-   else:
-      pst_start = datetime.datetime(year, 11, first_sun, 2, 0, 0)
-   if dt < pst_star:
-      return -7
-   return -8
-
+# Keep this around for posterity. We're now going to keep the timzeone
+# logic as timezone-aware datetime objects. 
+#def tzoffset(date, utc=True):
+#   '''Given a date (ephem Date), figure out if it's US PST or PDT and return
+#   correct offset. If utc is True, date is UTC, otherwise local time'''
+#   return 0
+#   dt = date.datetime()
+#   if dt.month in [1,2,12]:
+#      # Definitely PST
+#      return -8
+#   if dt.month in [4,5,6,7,8,9,10]:
+#      # Definitely PDT
+#      return -7
+#
+#   year = dt.year
+#   # More work
+#   if dt.month == 3:
+#      # PDT stars 2nd Sunday
+#      first_day = datetime.datetime(year, 3, 1, 1, 0, 0).isoweekday()
+#      sec_sun = 7 + (8-first_day)
+#      # PDT stars 10:00 UT or 2:00 PST, which is ambiguous
+#      if utc:
+#         pdt_start = datetime.datetime(year, 3, sec_sun, 10, 0, 0)
+#      else:
+#         pdt_start = datetime.datetime(year, 3, sec_sun, 2, 0, 0)
+#      if dt < pdt_start:
+#         return -8
+#      return -7
+#
+#   # November
+#   first_day = datetime.datetime(year, 11, 1, 1, 0, 0),isoweekday()
+#   first_sun = 8 - first_day
+#   # PST starts 09:00 UT or 2:00 am PDT, which is ambiguous
+#   if utc:
+#      pst_start = datetime.datetime(year, 11, first_sun, 9, 0, 0)
+#   else:
+#      pst_start = datetime.datetime(year, 11, first_sun, 2, 0, 0)
+#   if dt < pst_star:
+#      return -7
+#   return -8
+#
 
 class FilterForm(forms.Form):
    ha_high = forms.FloatField(min_value=0.0, required=False,
@@ -117,7 +122,7 @@ class FilterForm(forms.Form):
    only_visible = forms.BooleanField(required=False, label='Only Visible')
    # Settings
    epoch = forms.DateTimeField(required=False, 
-         widget=forms.TextInput(attrs={'size':20}),
+         widget=forms.TextInput(attrs={'size':20,'autocomplete':'off'}),
          input_formats=['%Y-%m-%d %H:%M','%Y-%m-%d %H:%M:%S'])
                 
    #new_window = forms.BooleanField(required=False, initial=False)
@@ -143,7 +148,8 @@ class AddObjectForm(forms.Form):
 
 def get_current_time(request):
    '''Get the current time. This could be 'now' or stored in the session.
-   Return as an ephem date object, so in UTC'''
+   Return as an ephem date object, so in UTC. Any session-saved date is
+   taken to be a timezone-aware datetime object.'''
    epoch = None
    if 'object_list_form' in request.session:
       epoch = request.session['object_list_form']['epoch']
@@ -152,7 +158,7 @@ def get_current_time(request):
       else:
          # Assumed to be in localtime
          date = ephem.Date(epoch)
-         date = ephem.Date(date - tzoffset(date)*ephem.hour)
+         #date = ephem.Date(date - tzoffset(date)*ephem.hour)
    else:
       date = ephem.now()
    date = date
@@ -226,22 +232,23 @@ def index(request):
       rating_low = form.cleaned_data.get('rating_low',None)
       epoch = form.cleaned_data.get('epoch',None)
       if epoch is not None: 
-         if isinstance(epoch, basestring):
+         if isinstance(epoch, str):
             epoch = epoch.encode('ascii','ignore')
       auto_reload = form.cleaned_data.get('auto_reload',False)
 
    if epoch:
-      # assumed to be in local time
+      # assumed to be in local time as a timezone-aware datetime object
       date = ephem.Date(ephem.Date(epoch))
-      date = ephem.Date(date - tzoffset(date)*ephem.hour)
+      #date = ephem.Date(date - tzoffset(date)*ephem.hour)
       #form.fields['epoch'].initial = str(date).replace('/','-')
    else:
       date = ephem.now()
 
    if deltat != 0:
       date = ephem.Date(date + deltat)
-      ldate = ephem.Date(date + tzoffset(date)*ephem.hour)
-      dt = ldate.datetime()
+      #ldate = ephem.Date(date + tzoffset(date)*ephem.hour)
+      #dt = ldate.datetime()
+      dt = ephem.to_timezone(date, zone)
 
       if 'object_list_form' in request.session:
          # Update the form so that the local time "sticks"
@@ -293,9 +300,11 @@ def index(request):
       newlist.append(obj)
    obj_list = newlist
 
-   sdate = ephem.Date(date+tzoffset(date)*ephem.hour)
-   sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
-   stz_offset = "%.1f" % (tzoffset(date))
+   #sdate = ephem.Date(date+tzoffset(date)*ephem.hour)
+   #sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
+   ldate = ephem.to_timezone(date, zone)
+   sdate = ldate.strftime('%m/%d/%y %H:%M:%S')
+   stz_offset = "%.1f" % (ldate.utcoffset().total_seconds()/3600)
 
    script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt, new_window=True)
@@ -347,7 +356,7 @@ def mapview(request):
 
    if epoch:  
       date = ephem.Date(epoch)
-      date = ephem.Date(date - tzoffset(date)*ephem.hour)
+      #date = ephem.Date(date - tzoffset(date)*ephem.hour)
    else:
       date = ephem.now()
 
@@ -381,11 +390,13 @@ def mapview(request):
 
    if epoch:
       sdate = epoch.strftime('%m/%d/%y %H:%M:%S')
-      stz_offset = "%.1f" % (tzoffset(ephem.Date(epoch), utc=False))
+      #stz_offset = "%.1f" % (tzoffset(ephem.Date(epoch), utc=False))
+      stz_offset = "%.1f" % (epoch.utcoffset().total_seconds()/3600)
    else:
-      sdate = ephem.Date(ephem.now()+tzoffset(ephem.now())*ephem.hour)
-      sdate = sdate.datetime().strftime('%m/%d/%y %H:%M:%S')
-      stz_offset = "%.1f" % (tzoffset(ephem.now()))
+      #sdate = ephem.Date(ephem.now()+tzoffset(ephem.now())*ephem.hour)
+      sdate = ephem.to_timezone(ephem.now(),zone)
+      stz_offset = "%.1f" % (sdate.utcoffset().total_seconds()/3600)
+      sdate = sdate.strftime('%m/%d/%y %H:%M:%S')
 
    script,div = plot_skyview.plot_sky_map(obj_list, date=date, 
          tel_az=tel_az, tel_alt=tel_alt)
@@ -501,7 +512,8 @@ def detail(request, object_id, view=None):
       ra_move = None
       dec_move = None
       tel_RA,tel_DEC,tel_ha,tel_alt,tel_az = telescope_position(cur_tel_obj, date)
-   script,div = plot_objs.plot_alt_map([obj], date=date, toff=tzoffset(date)) 
+   toff = ephem.to_timezone(date, zone).utcoffset().total_seconds()/3600
+   script,div = plot_objs.plot_alt_map([obj], date=date, toff=toff) 
    c = {
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
@@ -589,12 +601,12 @@ def finder(request, objectid):
    reverse = request.GET.get('reverse',None)
    if obj.objtype == 'SS':
       if 'object_list_form' in request.session:
-         epoch = str(request.session['object_list_form']['epoch'])
+         epoch = request.session['object_list_form']['epoch']
          if not epoch or epoch == 'None':
             date = ephem.now()
          else:
             date = ephem.Date(ephem.Date(epoch))
-            date = ephem.Date(date - tzoffset(date)*ephem.hour)
+            #date = ephem.Date(date - tzoffset(date)*ephem.hour)
       else:
          date = ephem.now()
       content = get_planets.get_image(obj.name, date, size)
@@ -618,7 +630,7 @@ def finder(request, objectid):
 
    obj.finder.open()
    # If needed do some transformations
-   outstr = StringIO.StringIO()
+   outstr = BytesIO()
    img = Image.open(obj.finder)
    if size and int(size) < settings.FINDER_BASE_SIZE:
       size = int(size)

@@ -10,7 +10,7 @@ try:
    import ephem3 as ephem
 except:
    import ephem
-from models import genMWO
+from .models import genMWO
 
 colors = {'c':'blue','ab':'red'}
 
@@ -40,7 +40,7 @@ def plot_alt_map(objs, date=None, toff=0, new_window=False, imsize=300):
       hoverobj = 'objs'
    hover = HoverTool(tooltips=[("time","@tlabel"), ("altitude","@alt")], 
          mode='vline', names=[hoverobj])
-   fig = figure(plot_height=2*imsize/3, plot_width=imsize, tools=[hover], 
+   fig = figure(plot_height=2*imsize//3, plot_width=imsize, tools=[hover], 
          x_axis_type=None)
    ticker = SingleIntervalTicker(interval=2.0/24, num_minor_ticks=5)
    xaxis = LinearAxis(ticker=ticker)

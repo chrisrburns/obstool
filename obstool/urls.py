@@ -13,20 +13,24 @@ Including another URLconf
     1. Add an import:  from blog import urls as blog_urls
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
-from django.conf.urls import include, url
+from django.urls import include, re_path
 from django.contrib import admin
 from django.views.generic.base import TemplateView
-from django.views.static import serve
-from settings import MEDIA_ROOT,SITE_ROOT,BOKEH_JS,BOKEH_CSS
-import navigator.urls
+from django.conf.urls.static import static
+from .settings import MEDIA_ROOT,SITE_ROOT,BOKEH_JS
+#import navigator.urls
 
 urlpatterns = [
-    url(r'^index.html$', TemplateView.as_view(template_name='main.html')),
-    url(r'^$', TemplateView.as_view(template_name='main.html')),
-    url(r'^navigator/', include('navigator.urls', namespace='navigator')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^media/js/bokeh/(?P<path>.*)$', serve, {'document_root':BOKEH_JS}),
-    url(r'^media/css/bokeh/(?P<path>.*)$', serve, {'document_root':BOKEH_CSS}),
-    url(r'^media/(?P<path>.*)$', serve, {'document_root':MEDIA_ROOT}),
-    url(r'(?P<path>.*)$', serve, {'document_root':SITE_ROOT}),
+    re_path(r'^index.html$', TemplateView.as_view(template_name='main.html')),
+    re_path(r'^$', TemplateView.as_view(template_name='main.html')),
+    re_path(r'^navigator/', include('navigator.urls')),
+    re_path(r'^admin/', admin.site.urls),
+#    url(r'^media/js/bokeh/(?P<path>.*)$', serve, {'document_root':BOKEH_JS}),
+#    url(r'^media/css/bokeh/(?P<path>.*)$', serve, {'document_root':BOKEH_CSS}),
+#    url(r'^media/(?P<path>.*)$', serve, {'document_root':MEDIA_ROOT}),
+#    url(r'(?P<path>.*)$', serve, {'document_root':SITE_ROOT}),
 ]
+urlpatterns += static("/media/js/bokeh/", document_root=BOKEH_JS)
+#urlpatterns += static("/media/css/bokeh/", document_root=BOKEH_CSS)
+urlpatterns += static("/media/", document_root=MEDIA_ROOT)
+#urlpatterns += static("/", document_root=SITE_ROOT)

@@ -19,7 +19,7 @@ from astropy.utils.iers import conf as iers_conf
 iers_conf.auto_download = False
 
 BOKEH_JS = os.path.join(os.path.dirname(bokeh.__file__),'server','static','js')
-BOKEH_CSS = os.path.join(os.path.dirname(bokeh.__file__),'server','static','css')
+#BOKEH_CSS = os.path.join(os.path.dirname(bokeh.__file__),'server','static','css')
 # Here are some site-wide configuration settings that can be changed 
 # on a per-user basis:
 # The 3-D position of the observing site
@@ -89,18 +89,20 @@ INSTALLED_APPS = (
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
 )
 
 ROOT_URLCONF = 'obstool.urls'
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 TEMPLATES = [
     {
@@ -135,6 +137,9 @@ DATABASES = {
     }
 }
 DATABASE_ROUTERS = ['obstool.router.MyAppRouter']
+
+# Avoid the warnings and don't want to migrate the database
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 
 # Internationalization

@@ -15,7 +15,7 @@ codes = {'Moon':'301',
 
 import urllib
 from PIL import Image
-import cStringIO
+from io import BytesIO
 import ephem
 import datetime
 from obstool import settings
@@ -27,28 +27,28 @@ def get_image(body, date, fov):
    if not fov:
       fov = settings.FINDER_BASE_SIZE
    if body not in codes:
-      raise ValueError, "Sorry, body must be a planet or moon"
+      raise ValueError("Sorry, body must be a planet or moon")
 
    dt = date.datetime()
-   try:
-      url = base_url % (codes[body],
-                                  dt.month,
-                                  dt.day,
-                                  dt.year,
-                                  dt.hour,
-                                  dt.minute,
-                                  float(fov)*2/60)
+#   try:
+   url = base_url % (codes[body],
+                               dt.month,
+                               dt.day,
+                               dt.year,
+                               dt.hour,
+                               dt.minute,
+                               float(fov)*2/60)
 
-      u = urllib.urlopen(url)
-   except:
-      return None
+   u = urllib.request.urlopen(url)
+   #except:
+   #   return None
     
    data = u.read()
    u.close()
-   f = cStringIO.StringIO(data)
+   f = BytesIO(data)
    im = Image.open(f)
    im2 = im.crop((200,25,600,425))
-   f2 = cStringIO.StringIO()
+   f2 = BytesIO()
    im2.save(f2, 'PNG')
    content = f2.getvalue()
    f.close()

@@ -4,6 +4,7 @@
 <title>{% block title %}{% endblock %}</title>
 <link rel="stylesheet" type="text/css" href="/media/css/base.css" />
 {% block style %}{% endblock %}
+<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 <meta name="robots" content="NONE,NOARCHIVE" />
 </head>
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">

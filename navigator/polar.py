@@ -87,7 +87,7 @@ class PolarPlot:
       def bfunc(r, t, *args, **kwargs):
          f = getattr(self.figure, name, None)
          if f is None:
-            raise AttributeError, name
+            raise AttributeError(name)
          source = kwargs.get('source', None)
          if source is not None:
             # A source is being used, so convert it at the ColumnSource level
@@ -111,7 +111,7 @@ class PolarPlot:
          return self.bind_bokeh(key)
       elif key in self.figure.__dict__:
          return self.figure.__dict__[key]
-      raise AttributeError, key
+      raise AttributeError(key)
 
    #def annulus(r,t, *args, **kwargs):
    #   return self.figure.annulus(*(self.rt2xy(r,t)+args), **kwargs)

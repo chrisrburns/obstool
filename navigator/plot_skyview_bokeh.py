@@ -6,13 +6,13 @@ making it easier to place than a matplotlib-generated image. Intractions
 are also much much better.'''
 
 import os
-import polar
+from . import polar
 from bokeh.plotting import ColumnDataSource
 from bokeh.embed import components
 from bokeh.resources import CDN
 from bokeh.models import HoverTool, OpenURL, TapTool, CustomJS
 from numpy import *
-from models import genMWO
+from .models import genMWO
 import pickle
 try:
    import ephem3 as ephem
@@ -29,9 +29,8 @@ import time
 
 # The constellation data.
 conlines = os.path.join(os.path.dirname(__file__), 'Conlines3.pkl')
-f = open(conlines)
-ra1s,ra2s,dec1s,dec2s = pickle.load(f)
-f.close()
+with open(conlines, 'rb') as f:
+   ra1s,ra2s,dec1s,dec2s = pickle.load(f)
 
 MWO = EarthLocation.of_site('mwo')
 
@@ -60,7 +59,7 @@ def osymb(s):
    '''returns an appropriate symbol to use based on object type.'''
    if s[0:2] == 'G-':
       # galaxy
-      return [('oval', {'width':15, 'height':7, 'angle':45, 
+      return [('ellipse', {'width':15, 'height':7, 'angle':45, 
          'line_color':'black','fill_color':None, 'width_units':'screen',
          'height_units':'screen'}),
               ('circle', {'size':5, 'line_color':'white', 'fill_color':None,
