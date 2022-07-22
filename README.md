@@ -11,13 +11,14 @@ Ultimately, the code should be able to run on a web-server (apache) or
 stand-alone on a computer if there is no internet.
 
 Requirements:
-  * [Python 2.7](http://www.python.org)
-  * [pyephem >= 3.7.6.0](http://rhodesmill.org/pyephem/)
-  * [Python Imaging Library (PIL) >= 1.1.7](http://www.pythonware.com/products/pil/)
-  * [django 1.8.4](https://www.djangoproject.com/)
+  * [Python 3.x](http://www.python.org)
+  * [pyephem](http://rhodesmill.org/pyephem/)
+  * [Python Imaging Library (PIL)](http://www.pythonware.com/products/pil/)
+  * [django](https://www.djangoproject.com/)
   * [Paper.js](http://paperjs.org)
-  * [astropy 1.2.1](http://www.astropy.org/)
+  * [astropy](http://www.astropy.org/)
+  * [bokeh](https://docs.bokeh.org/en/latest/)
 
 Screenshot:
 
-   ![Screenshot](https://github.com/chrisrburns/obstool/blob/master/screeshot.png?raw=true)
+   ![Screenshot](https://github.com/chrisrburns/obstool/blob/1a7e41335586f63f5e39dcece4fdea7aabc67b17/screeshot.png)
