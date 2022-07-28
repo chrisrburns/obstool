@@ -19,7 +19,7 @@ from astropy.io import ascii
 import ephem
 import Image
 from math import pi
-import cStringIO
+from io import BytesIO
 
 url = "http://archive.stsci.edu/cgi-bin/dss_search?v=poss2ukstu_red&r=%f&d=%f&e=J2000&h=60.0&w=60.0&f=gif"
 
@@ -57,28 +57,28 @@ for i in range(len(t)):
       o = Object.objects.get(name=name)
       for key in args:
          setattr(o, key, args[key])
-      print "Found existing object",o.pk
+      print("Found existing object {}".format(o.pk))
    except ObjectDoesNotExist:
-      print "Adding object"
+      print("Adding object")
       o = Object(name=name, **args)
       if args['objtype'] == 'SS':
          f = open('SS_default.png')
          o.finder.save('finder_'+o.savename()+'.png', ContentFile(f.read()))
          f.close()
       else:
-         print "Fetching",url % (args['RA'],args['DEC'])
-         u = urllib.urlopen(url % (args['RA'],args['DEC']))
-         f = cStringIO.StringIO(u.read())
+         print("Fetching {}".format(url % (args['RA'],args['DEC'])))
+         u = urllib.request.urlopen(url % (args['RA'],args['DEC']))
+         f = BytesIO(u.read())
          u.close()
          im = Image.open(f)
          #f.close()
          x,y = im.size
          im2 = im.resize((x/2,y/2))
-         f2 = cStringIO.StringIO()
+         f2 = ByesIO()
          im2.save(f2, format='PNG')
          o.finder.save('finder_'+o.savename()+'.gif', ContentFile(f2.getvalue()))
          f.close()
          f2.close()
    o.save()
-   print o.name + " loaded"
+   print(o.name + " loaded")
 
