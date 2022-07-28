@@ -252,10 +252,11 @@ def index(request):
 
       if 'object_list_form' in request.session:
          # Update the form so that the local time "sticks"
-         # Need to do this because we need integer seconds (no microseconds)
+         # Need to make a new instance because the widget doesn't like
+         # non-integer seconds, but dt.microsecond is not mutable.
          request.session['object_list_form']['epoch'] = \
-               datetime.datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute,
-                     dt.second)
+               datetime.datetime(dt.year, dt.month, dt.day, dt.hour, 
+                     dt.minute, dt.second, tzinfo=dt.tzinfo)
          form = FilterForm(request.session['object_list_form'])
 
    # Now deal with telescope position
