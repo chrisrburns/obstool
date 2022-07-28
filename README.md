@@ -13,9 +13,7 @@ stand-alone on a computer if there is no internet.
 ## Requirements:
   * [Python 3.x](http://www.python.org)
   * [pyephem](http://rhodesmill.org/pyephem/)
-  * [Python Imaging Library (PIL)](http://www.pythonware.com/products/pil/)
   * [django](https://www.djangoproject.com/)
-  * [Paper.js](http://paperjs.org)
   * [astropy](http://www.astropy.org/)
   * [bokeh](https://docs.bokeh.org/en/latest/)
 
@@ -23,7 +21,7 @@ stand-alone on a computer if there is no internet.
 
 Easiest and safest way to install is using miniconda or anaconda:
 
-    conda create -n obstool ephem django astropy bokey
+    conda create -n obstool ephem django astropy bokeh
     cd someplace
     git clone https://github.com/chrisrburns/obstool
 
