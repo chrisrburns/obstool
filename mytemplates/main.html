@@ -1,12 +1,28 @@
 {% extends "base_site.html" %}
 {% block breadcrumbs %}<div class="breadcrumbs">
    Home </div> {% endblock %}
-{% block pretitle %} <h2> Welcome to the MWO Observing Tool </h2> {% endblock %}
+{% block pretitle %} <h1> Welcome to the MWO Observing Tool </h1> {% endblock %}
 {% block content %}
-From here you can visit the following tools.
+<P>
+<img src=/media/imgs/100_inch_view.001.jpeg><br><P>
+Here are some custom tools developed by Chris Burns, specifically to help
+with operating the telescopes at <a href='https://mtwilson.edu'>
+Mount Wilson Observatory</a>.</P>
 <UL>
-   <LI><a href="navigator/">List of Objects</a></LI>
-   <LI><a href="navigator/skymap">Sky Map</a></LI>
-   <LI><a href="admin/">Site Administration</a></LI>
+   <LI><h3><a href="navigator/">The Interactive Nicholson List</a></h3>
+       This tool
+       gives both a spreadsheet-like list of currently visible objects
+       as well as visual representation of the sky. Best viewed with a
+       browser window at least 1400 pixels wide (or you can scale it down
+       using your browser's controls).</LI>
+   <LI><h3><a href='https://docs.google.com/spreadsheets/d/1InFeGjT49p_HtvLEVNgQ4355sj8c_4hS5B_wVZ03hHk/edit?usp=sharing'>Birthday/Anniversary Star Finder</a></h3>
+       This is a google spreadsheet with all visible (V>12) stars within 
+       100 ly of the
+       Earth. It is sorted by distance (in ly), so hopefully easy to find
+       a star that matches a specific year. It is shared read-only, so can
+       be viewed, but if you want to filter and/or sort the data, you will
+       need to make a copy to your own google account.
+ 
+   <LI><h3><a href="admin/">Site Administration</a></h3></LI>
 </UL>
 {% endblock %}
