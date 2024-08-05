@@ -29,6 +29,7 @@ class Object(models.Model):
    finder = models.ImageField(upload_to='finders', default='default.gif')
    comments = models.TextField(max_length=1000)
    epoch = None
+   telescope = '60'
    tel_az = None
    
    
@@ -221,13 +222,13 @@ class Object(models.Model):
 
    def visible(self):
       '''Returns True/False whether object is visible'''
-      return self.altitude() > settings.ALT_LIMIT and \
-             abs(self.hour_angle()) < settings.HA_LIMIT
+      return self.altitude() > settings.ALT_LIMIT[self.telescope] and \
+             abs(self.hour_angle()) < settings.HA_LIMIT[self.telescope]
 
    def settime(self):
       '''Remaining time before the object sets, nicely formatted.'''
       MWO = genMWO(self.epoch)
-      MWO.horizon = ephem.degrees(settings.ALT_LIMIT*pi/180.)
+      MWO.horizon = ephem.degrees(settings.ALT_LIMIT[self.telescope]*pi/180.)
       star = self.genobj()
       try:
          settime = MWO.next_setting(star)
@@ -244,7 +245,8 @@ class Object(models.Model):
 
 
    def low(self):
-      return settings.ALT_SOFT_LIMIT < self.altitude() < settings.ALT_LIMIT
+      return settings.ALT_SOFT_LIMIT[self.telescope] < self.altitude() \
+             < settings.ALT_LIMIT[self.telescope]
 
    def savename(self):
       '''return a name safe for filenames'''

@@ -183,6 +183,7 @@
            <button style="float: right;" onclick="hide_section(this)">_</button>
         </h2>
         <div id=body style="display: {{ module_display.settings }};">
+            Telescope: {{ form.telescope.errors }} {{ form.telescope }}<br>
             Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
             <!--<div style="text-align: center;">
                <font size=-2>(yyyy-mm-dd hh:mm)<br>Blank = now </font>

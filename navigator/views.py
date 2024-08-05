@@ -110,7 +110,7 @@ TYPE_CHOICES = (
 
 class FilterForm(forms.Form):
    ha_high = forms.FloatField(min_value=0.0, required=False,
-         label='|HA| <', initial=settings.HA_SOFT_LIMIT,
+         label='|HA| <', initial=settings.HA_SOFT_LIMIT['60'],
          widget=forms.TextInput(attrs={'size':'5'}))
    rating_low = forms.IntegerField(required=False,
          label='rating >', initial=0,
@@ -127,6 +127,8 @@ class FilterForm(forms.Form):
                 
    #new_window = forms.BooleanField(required=False, initial=False)
    auto_reload = forms.BooleanField(required=False, initial=True)
+   telescope = forms.ChoiceField(choices=settings.TELESCOPES, required=False,
+                  initial='60-inch')
 
 class AddObjectForm(forms.Form):
    object_name = forms.CharField(
@@ -178,8 +180,9 @@ def telescope_position(obj_name,date):
            "%.2f" % (obj.azimuth()))
 
 def index(request):
+   telescope = '60'
    only_visible = None
-   ha_high = settings.HA_SOFT_LIMIT
+   ha_high = settings.HA_SOFT_LIMIT[telescope]
    epoch = None
    rating_low = None
    new_window = True
@@ -226,8 +229,11 @@ def index(request):
       form = FilterForm(request.session['object_list_form'])
 
    if form.is_valid():
+      telescope = form.cleaned_data.get('telescope','60')
+      if not telescope:  telescope = '60'
       only_visible = form.cleaned_data.get('only_visible',None)
-      ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
+      ha_high = form.cleaned_data.get('ha_high',
+                settings.HA_SOFT_LIMIT[telescope])
       show_types = form.cleaned_data.get('show_types', ['All'])
       rating_low = form.cleaned_data.get('rating_low',None)
       epoch = form.cleaned_data.get('epoch',None)
@@ -272,14 +278,15 @@ def index(request):
    RAoffset = obs.sidereal_time()*180/pi    # Now in degrees
    l = [RAoffset]*5
    if (only_visible is not None and only_visible):
-      sql += " WHERE ( abs(HA) < %s AND DEC > %s)"
-      l += [settings.HA_LIMIT*15, settings.DEC_LIMIT]
+      sql += " WHERE ( abs(HA) < %s AND DEC > %s and DEC < %s)"
+      l += [settings.HA_LIMIT[telescope]*15, settings.DEC_LIMIT_LOW[telescope],
+           settings.DEC_LIMIT_HIGH[telescope]]
    elif ha_high is not None:
-      sql += " WHERE (abs(HA) < %s and DEC > %s)"
-      l += [ha_high*15, settings.DEC_LIMIT]
+      sql += " WHERE (abs(HA) < %s)"
+      l += [ha_high*15]
    else:
-      sql += " WHERE (abs(HA) < 90 and DEC > %s)"
-      l += [settings.DEC_LIMIT]
+      sql += " WHERE (abs(HA) < %s)"
+      l += [90]
 
    if rating_low is not None:
       sql += " AND rating >= %s"
@@ -315,14 +322,15 @@ def index(request):
       'auto_reload':auto_reload, 'selected_object':selected_object,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az,'sid_time':sid_time,'script':script,'div':div,
-      'module_display':module_display,
+      'module_display':module_display, 'telescope':telescope,
       'selected_tab':selected_tab,
       }
    return render(request, 'navigator/object_list.sortable.html', c)
 
 def mapview(request):
    only_visible = None
-   ha_high = settings.HA_SOFT_LIMIT
+   telescope = '60'
+   ha_high = settings.HA_SOFT_LIMIT[telescope]
    epoch = None
    rating_low = None
    new_window = True
@@ -349,8 +357,11 @@ def mapview(request):
       form = FilterForm(request.session['object_list_form'])
 
    if form.is_valid():
+      telescope = form.cleaned_data.get('telescope', '60')
+      if not telescope:  telescope = '60'
       only_visible = form.cleaned_data.get('only_visible',None)
-      ha_high = form.cleaned_data.get('ha_high',settings.HA_SOFT_LIMIT)
+      ha_high = form.cleaned_data.get('ha_high',
+          settings.HA_SOFT_LIMIT[telescope])
       show_types = form.cleaned_data.get('show_types', None)
       rating_low = form.cleaned_data.get('rating_low',None)
       epoch = form.cleaned_data.get('epoch',None)
@@ -421,6 +432,11 @@ def detail(request, object_id, view=None):
 
    date = get_current_time(request)
    obj.epoch = date
+
+   telescope = '60'
+   if 'object_list_form' in request.session:
+      telescope = request.session['object_list_form'].get('telescope','60')
+      if not telescope:  telescopes = '60'
    
 
    if request.method == 'POST':
@@ -461,8 +477,8 @@ def detail(request, object_id, view=None):
    delete_object = request.session.get('delete_object', 'None')
 
    eyepiece = request.session.get('cur_eye', None)
-   if eyepiece is not None:
-      FOV = settings.fovs[eyepiece]
+   if eyepiece is not None and eyepiece in settings.fovs[telescope]:
+      FOV = settings.fovs[telescope][eyepiece]
    else:
       FOV = settings.FINDER_SIZE
 
@@ -519,7 +535,7 @@ def detail(request, object_id, view=None):
       'object':obj, 'extras':extras, 
       'finder_orientation':settings.FINDER_ORIENTATION, 
       'finder_size':FOV,
-      'eyepieces':settings.fovs,'cur_eyepiece':eyepiece,
+      'eyepieces':settings.fovs[telescope],'cur_eyepiece':eyepiece,
       'message':message, 'error':error, 'epoch':epoch,
       'tel_RA':tel_RA,'tel_DEC':tel_DEC,'tel_ha':tel_ha,'tel_alt':tel_alt,
       'tel_az':tel_az, 'tel_status':tel_status, 'az_move':az_move,

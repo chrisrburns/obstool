@@ -27,25 +27,33 @@ OBSERVING_LONG = "-118.0590"
 OBSERVING_LAT = "34.2170"
 OBSERVING_ELEV = 1579
 
+TELESCOPES = [('60','60-inch'),('100','100-inch')]
+
 # The effective horizon for the observing site.  For now, this is just a
 # constant altitude, but later maybe user can specify a real horizon
 # as alt/az points?
-ALT_LIMIT = 32.0
+ALT_LIMIT = {'60':30.0, '100':30.0}
 # This is a soft limit that maybe the user should be worried
-ALT_SOFT_LIMIT = 40.0
+ALT_SOFT_LIMIT = {'60':40.0, '100':40.0}
 # An hour-angle limit
-HA_LIMIT = 4.0
+HA_LIMIT = {'60':4.0, '100':4.0}
 # This is a soft limit that maybe the user should be worried
-HA_SOFT_LIMIT = 3.0
+HA_SOFT_LIMIT = {'60':3.0, '100':3.0}
 # Declination limit
-DEC_LIMIT = -27.0
+DEC_LIMIT_LOW = {'60':-27.0, '100':-27.0}
+DEC_LIMIT_HIGH = {'60':91, '100':55.0}
 
-# eyepieces and field-of-views
-fovs = {
+# eyepieces and field-of-views for each telescope
+fovs = {'60':{
         '50mm':6,
         '80mm':9,
         '100mm':11,
+        },
+        '100':{
+           '55mm':5,
+           '80mm':8
         }
+}
 
 FINDER_BASE_SIZE=60      # arc-min
 FINDER_SIZE=10      # arc-min
