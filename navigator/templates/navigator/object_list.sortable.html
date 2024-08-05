@@ -177,35 +177,6 @@
 <iframe height=1200 width=580 src="/navigator/{{ selected_object }}/basic" name="detailFrame"
    scrolling="no" style="border: 0px; display:block; float:left;"></iframe>
 <div id="content-related">
-   <div class="module" id="tinfo">
-      <h2>Telescope Position
-         <button style="float: right;" onclick="hide_section(this)">_</button>
-      </h2>
-      <div id=body style="display: {{ module_display.tinfo }};">
-         <table border=0>
-            <tr>
-               <td>RA:</td><td> {{ tel_RA }} </td>
-            </tr>
-            <tr>
-               <td>DEC:</td><td> {{ tel_DEC }} </td>
-            </tr>
-            <tr>
-               <td>HA:</td><td> {{ tel_ha }} </td>
-            </tr>
-            <tr>
-               <td>Alt:</td><td> {{ tel_alt }}&deg; </td>
-            </tr>
-            <tr>
-               <td>Az:</td><td> {{ tel_az }}&deg;</td>
-            </tr>
-         </table>
-         <br>
-         <form action="" method="POST">{% csrf_token %}
-            <input type=submit name='action' value='Park'>
-         </form>
-      </div>
-   </div>
-
    <form action="" method="post">{% csrf_token %}
      <div class="module" id="settings">
         <h2>Settings
@@ -213,15 +184,14 @@
         </h2>
         <div id=body style="display: {{ module_display.settings }};">
             Date:  {{ form.epoch.errors }} {{ form.epoch }}<br>
-            <div style="text-align: center;">
+            <!--<div style="text-align: center;">
                <font size=-2>(yyyy-mm-dd hh:mm)<br>Blank = now </font>
-            </div><br>
+            </div><br>-->
             <center>
             <input type="submit" name="action" value="-1h">
             <input type="submit" name="action" value="-30m">
             <input type="submit" name="action" value="+30m">
             <input type="submit" name="action" value="+1h"></center><br>
-            <br>
             <!-- {{ form.new_window.errors }} {{ form.new_window }} Links opens new window/tab
             <br> -->
             {{ form.auto_reload.errors }} {{ form.auto_reload }} Refresh Automatically
