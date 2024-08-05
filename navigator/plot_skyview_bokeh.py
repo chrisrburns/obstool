@@ -98,11 +98,12 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    MWO = genMWO(date)
 
    # Setup the graph
-   hover = HoverTool(tooltips=[("Name", "@label"),("Type","@type"),("Alt","@alt")],
-         names=['obj'])
+   hover = HoverTool()
+   hover.tooltips = [("Name", "@label"),
+                     ("Type","@type"),("Alt","@alt")]
    #tap = TapTool(callback=OpenURL(url="/navigator/@pk/"), names=['obj'])
 
-   fig = polar.PolarPlot(plot_height=imsize, plot_width=imsize, rmax=90,
+   fig = polar.PolarPlot(height=imsize, width=imsize, rmax=90,
          tools=["pan","wheel_zoom","box_zoom","reset",hover], theta0=pi/2,
          clockwise=True)
    
@@ -159,6 +160,9 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
    }
    """ % js_redirect)
    fig.figure.js_on_event('tap', callback)
+   
+   # Now need to keep track of all the things the hovertool needs to show
+   renderers = []
    for key in sources:
       sources[key]['rho'] = array(sources[key]['rho'])
       sources[key]['theta'] = array(sources[key]['theta'])
@@ -169,7 +173,7 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
       elements = osymb(key)
       for (func,args) in elements:
          f = getattr(fig, func)
-         f('rho','theta',source=sources[key], **args)
+         renderers.append(f('rho','theta',source=sources[key], **args))
             
    # Telescope pos
    theta = float(tel_az)*pi/180
@@ -186,6 +190,8 @@ def plot_sky_map(objs, date=None, new_window=False, airmass_high=None,
 
    x1s = x1s[gids]; x2s = x2s[gids]; y1s = y1s[gids]; y2s = y2s[gids]
    fig.segment(x1s,y1s,x2s,y2s, line_color='gray', line_width=0.5)
+
+   hover.renderers = renderers
 
    fig.grid()
    fig.taxis_label()
