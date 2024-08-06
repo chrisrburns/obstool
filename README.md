@@ -16,6 +16,7 @@ stand-alone on a computer if there is no internet.
   * [django](https://www.djangoproject.com/)
   * [astropy](http://www.astropy.org/)
   * [bokeh](https://docs.bokeh.org/en/latest/)
+  * [requests](https://pypi.org/project/requests/)
 
 ## Installation:
 
@@ -24,6 +25,11 @@ Easiest and safest way to install is using miniconda or anaconda:
     conda create -n obstool ephem django astropy bokeh
     cd someplace
     git clone https://github.com/chrisrburns/obstool
+
+Or, if you're okay just installing stuff into your base python distribution,
+you can use `pip`:
+
+    pip install ephem django astropy bokeh requests
 
 ## Running the tool:
 
