@@ -1,7 +1,8 @@
 {% extends "base_site.html" %}
 {% block breadcrumbs %}<div class="breadcrumbs">
    Home </div> {% endblock %}
-{% block pretitle %} <h1> Welcome to the MWO Observing Tool </h1> {% endblock %}
+{% block pretitle %} <h1> Welcome to Chris Burns' MWO Observing Tool </h1> 
+{% endblock %}
 {% block content %}
 <P>
 <img src=/media/imgs/100_inch_view.001.jpeg><br><P>
@@ -22,7 +23,22 @@ Mount Wilson Observatory</a>.</P>
        a star that matches a specific year. It is shared read-only, so can
        be viewed, but if you want to filter and/or sort the data, you will
        need to make a copy to your own google account.
- 
+   <LI><h3><a href="/media/60-inchOperationsManual.pdf">60-inch Operations 
+       Manual</a></h3></LI>
+
+   <LI><h3>Weather Links</h3>
+       <UL>
+          <LI><a href="https://ambientweather.net/dashboard/c68efe875521e576a9694913bdd92e65">Richard Bell's Weather Station</a></LI>
+          <LI><a href="https://www.cleardarksky.com/c/MtWilsonOBCAkey.html">The
+              Mount Wilson Observatory Clear Sky Chart</a></LI>
+          <LI><a href="https://forecast.weather.gov/MapClick.php?site=lox&smap=1&textField1=34.22639&textField2=-118.06528">National Weather Service forecast</a></LI>
+          <LI><a href="https://www.hpwren.ucsd.edu/cameras/S/SD/wilson.html">
+              HPWREN tower cameras</a></LI>
+      </UL></LI> 
+   <LI><h3><a href="https://github.com/chrisrburns/obstool">GitHub Site</a></h3>
+      If you want to run the tool natively on your own computer, you can 
+      go here to get the code. It runs under python with only a few extra
+      modules, so likely can run on Mac, Windows, or Linux.</LI>
    <LI><h3><a href="admin/">Site Administration</a></h3></LI>
 </UL>
 {% endblock %}
