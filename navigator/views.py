@@ -717,9 +717,10 @@ def add_object(request):
          except ObjectDoesNotExist:
             message = "Adding object %s" % data['name']
             o = Object(**data)
-         # Get the finder
-         img = query.get_image(o.RA, o.DEC)
-         o.finder.save('finder_'+o.savename()+'.gif', ContentFile(img))
+         # Get the finder. This is now handled as a pre-save/post-save
+         # signal.  I hope.
+         # img = query.get_image(o.RA, o.DEC)
+         #o.finder.save('finder_'+o.savename()+'.gif', ContentFile(img))
          o.save()
          return HttpResponseRedirect('/navigator/%d/' % o.pk)
    else:

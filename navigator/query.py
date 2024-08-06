@@ -3,7 +3,7 @@ and extract useful info'''
 
 from astropy.utils.data import get_readable_fileobj
 from astropy.table import Table
-import urllib
+import requests
 from io import BytesIO
 from PIL import Image
 
@@ -29,13 +29,13 @@ votable close
 poss_url = "http://archive.stsci.edu/cgi-bin/dss_search?v=poss2ukstu_red&r=%f&d=%f&e=J2000&h=60.0&w=60.0&f=gif"
 
 def get_image(ra, dec):
-   u = urllib.urlopen(poss_url % (ra,dec))
-   f = BytesIO(u.read())
+   u = requests.get(poss_url % (ra,dec))
+   f = BytesIO(u.content)
    u.close()
    im = Image.open(f)
    #f.close()
    x,y = im.size
-   im2 = im.resize((x/2,y/2))
+   im2 = im.resize((x//2,y//2))
    f2 = BytesIO()
    im2.save(f2, format='PNG')
    f.close()

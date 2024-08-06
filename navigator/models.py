@@ -2,6 +2,10 @@ from django.db import models
 import ephem
 from math import pi,cos
 from obstool import settings
+from django.db.models.signals import pre_save,post_save
+from django.dispatch import receiver
+from . import query
+from django.core.files.base import ContentFile
 
 def genMWO(date=None):
    MWO = ephem.Observer()
@@ -252,3 +256,29 @@ class Object(models.Model):
       '''return a name safe for filenames'''
       return self.name.replace(' ','_')
 
+# Register some signals to handle downloading the DSS finder. But we only
+# want to do this on changes to RA/DEC, so use pre_save to save the orignal
+# values and post_save to test if they changed
+@receiver(pre_save, sender=Object)
+def on_change(sender, instance, **kwargs):
+   RA0 = None
+   DEC0 = None
+   if instance.id:
+      obj = Object.objects.get(pk=instance.id)
+      RA0 = obj.RA
+      DEC0 = obj.DEC
+   instance.__RA0 = RA0
+   instance.__DEC0 = DEC0
+
+@receiver(post_save, sender=Object)
+def updateFinder(sender, instance, **kwargs):
+   print(instance.__RA0, instance.__DEC0, instance.RA, instance.DEC)
+   update = True
+   if instance.__RA0 is not None:
+      if abs(instance.__RA0 - instance.RA) < 0.0001 and \
+         abs(instance.__DEC0 - instance.DEC) < 0.0001:
+         update = False
+   if update:
+      img = query.get_image(instance.RA, instance.DEC)
+      instance.finder.save('finder_'+instance.savename()+'.gif',
+                           ContentFile(img))
